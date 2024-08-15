@@ -5,29 +5,38 @@ Table clients {
   client_id integer [primary key]
   client_name varchar [not null]
   created_at timestamp 
+  Note: 'Пользователи сервиса такси'
 }
 
 // TODO: в будущем можно организовать составные маршруты из нескольких точек, что потребует переработки таблицы (добавление доп. таблиц)
 Table orders {
   order_id integer [primary key]
   client_id integer [not null]
-  start_latitude Numeric(6,5) // широта точки старта
-  start_longitude Numeric(6,5) // долгота точки старта
-  finish_latitude Numeric(6,5) // широта точки финиша
-  finish_longitude Numeric(6,5) // долгота точки финиша
-  price Numeric(18,2)
-  created_at timestamp
 
+  start_address varchar [Note: 'Адрес начала поездки']
+  start_latitude Numeric(6,5) [Note: 'широта точки старта'] 
+  start_longitude Numeric(6,5) [Note: 'долгота точки старта']
+
+  finish_address varchar [Note: 'Адрес завершения поездки']
+  finish_latitude Numeric(6,5) [Note: 'широта точки финиша'] 
+  finish_longitude Numeric(6,5) [Note: 'долгота точки финиша']
+
+  price Numeric(18,2) [Note: 'цена поездки']
+
+  comment varchar
+  baby_chair_fl boolean [Note: 'признак необходимости детского кресла']
+  created_at timestamp
   Indexes { 
     client_id
   }
+  Note: 'Заказы такси'
 }
-
+  
 Table order_status {
   id integer [primary key]
   order_id integer [not null]
+  status varchar [not null, Note: 'Статус может быть равен: {created, car_assigned, trip_started, trip_finished, cancelled}']
   car_id integer 
-  status varchar
   start_at timestamp
   finish_at timestamp
   unpaid_rest Numeric(18,2)
@@ -38,27 +47,7 @@ Table order_status {
   Indexes { 
     car_id
   }
-
-}
-
-Table drivers {
-  driver_id integer [primary key]
-  driver_name varchar [not null]
-  created_at timestamp
-}
-
-Table car_drivers {
-  id integer [primary key]
-  driver_id integer [not null]
-  car_id integer [not null]
-  fromdate date [not null]
-  created_at timestamp 
-  Indexes { 
-    driver_id
-  }
-  Indexes { 
-    car_id
-  }
+  Note: 'Статусы заказов такси. Столбцы начиная с car_id необязательны, и заполняются по мере назначения автомобиля, начала поездки, завершения поездки, оплаты поездки соответственно'
 }
 
 Table cars {
@@ -69,19 +58,44 @@ Table cars {
   vin_number varchar
   reg_number varchar [not null]
   created_at timestamp 
+  Note: 'Автомобили такси'
 }
 
 Table car_status {
   id integer [primary key]
   car_id integer [not null]
-  status varchar
-  current_latitude Numeric(6,5) // широта точки финиша
-  current_longitude Numeric(6,5) // долгота точки финиша
-  order_id integer // занятость водителя в поездке
+  status varchar [not null, Note: 'Статус может быть равен: {free, busy, broken, driver_missing}']
+  current_latitude Numeric(6,5) [Note: 'Широта текущего местоположения']
+  current_longitude Numeric(6,5) [Note: 'Долгота текущего местоположения']
+  order_id integer [Note: 'Заказ, на который назначен автомобиль на текущий момент (может быть пустым)']
   created_at timestamp  
   Indexes { 
     car_id
-  }  
+  }
+  Note: 'Состояние автомобиля'
+}
+
+Table car_drivers {
+  id integer [primary key]
+  driver_id integer [not null]
+  car_id integer [not null]
+  fromdate date [not null, Note: 'Дата, с которой водитель назначен на автомобиль']
+  created_at timestamp 
+  Indexes { 
+    driver_id
+  }
+  Indexes { 
+    car_id
+  }
+  Note: 'Назначение водителей автомобилям'
+}
+
+Table drivers {
+  driver_id integer [primary key]
+  driver_name varchar [not null]
+  driver_license varchar [not null] //TODO: вынести водительские удостоверения в отдельную таблицу, т.к. они могут меняться
+  created_at timestamp
+  Note: 'Водители автомобилей'
 }
 
 
