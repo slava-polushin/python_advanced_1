@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Страница — 1" id="QKdwFJGbec12Yq18jWQP">
-        <mxGraphModel dx="1029" dy="360" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="930" dy="385" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -134,16 +134,16 @@
                         <mxPoint x="483" y="544" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="2" value="1. HTTP запрос создания заявки на поездку&lt;br&gt;2. HTTP запрос получения информации о ранее созданной заявке&lt;br&gt;3. HTTP запрос отмены заявки&lt;br&gt;4. HTTP запрос оплаты заявки&lt;br&gt;5. HTTP запрос получения координат по адресам заявки (в тестовом прототипе генерируется случайным образом)&lt;br&gt;6. HTTP запрос цены поездки&lt;br&gt;7. Сообщение об оплате поездки (RabbitMQ Direct exchange)&lt;br&gt;8. Уведомление о результате оплаты поездки (RabbitMQ Fanout Exchange)&lt;br&gt;9. HTTP Запрос генерируемый UI по уточнению текущих координат автомобиля&lt;br&gt;10. HTTP запрос получения списка заказов неподалеку от автомобиля&lt;br&gt;11. HTTP запрос назначения автомобиля заказу&lt;br&gt;12. HTTP запрос отмены назначения автомобиля заказу&lt;br&gt;13. Уведомление об изменении статуса поездки: появление/отмена (RabbitMQ Fanout Exchange)&lt;br&gt;14. Уведомление о выполнении поездки&amp;nbsp;либо отмены водителем ранее созданного назначения поездки (RabbitMQ Direct exchange)&lt;br&gt;15. Информация о местоположении автомобилей&amp;nbsp;&amp;nbsp;(RabbitMQ Direct exchange)&lt;br&gt;16. Запись информации о заказах и их обработке в БД" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                <mxCell id="2" value="1. HTTP запрос создания заявки на поездку&lt;br&gt;2. HTTP запрос получения информации о ранее созданной заявке&lt;br&gt;3. HTTP запрос отмены заявки&lt;br&gt;4. HTTP запрос оплаты заявки&lt;br&gt;5. HTTP запрос получения координат по адресам заявки (в тестовом прототипе генерируется случайным образом)&lt;br&gt;6. HTTP запрос цены поездки&lt;br&gt;7. Сообщение об оплате поездки (RabbitMQ Direct exchange)&lt;br&gt;8. Уведомление о результате оплаты поездки (RabbitMQ Direct&amp;nbsp;Exchange)&lt;br&gt;9. HTTP Запрос генерируемый UI по уточнению текущих координат автомобиля&lt;br&gt;10. HTTP запрос получения списка заказов неподалеку от автомобиля&lt;br&gt;11. HTTP запрос назначения автомобиля заказу&lt;br&gt;12. HTTP запрос отмены назначения автомобиля заказу&lt;br&gt;13. Уведомление об изменении статуса поездки: появление/отмена (RabbitMQ Fanout Exchange)&lt;br&gt;14. Уведомление о выполнении поездки&amp;nbsp;либо отмены водителем ранее созданного назначения поездки (RabbitMQ Direct exchange)&lt;br&gt;15. Информация о местоположении автомобилей&amp;nbsp;&amp;nbsp;(RabbitMQ Direct exchange)&lt;br&gt;16. Запись информации о заказах и их обработке в БД" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="38" y="585" width="760" height="240" as="geometry"/>
                 </mxCell>
-                <mxCell id="3" value="" style="endArrow=classic;html=1;entryX=1;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1">
+                <mxCell id="3" value="" style="endArrow=classic;html=1;entryX=1;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="506" y="428" as="sourcePoint"/>
                         <mxPoint x="308" y="428" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="4" value="15. Cars locations info" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="4" value="15. Cars locations info" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="310" y="425" width="140" height="30" as="geometry"/>
                 </mxCell>
             </root>

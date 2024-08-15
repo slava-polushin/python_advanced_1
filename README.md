@@ -6,6 +6,7 @@ Homework #1 : bootcamp python advanced
 .gitignore Шаблоны файлов исключаемых из контроля версий
 
 Architecture.drawio Схема архитектуры приложения
+
 Architecture.drawio.png Схема архитектуры приложения, экспортированная в png
 
 db-schema.dbml Схема БД (создана в https://dbdiagram.io/ )
