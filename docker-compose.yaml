@@ -1,0 +1,53 @@
+version: '3.3'
+
+services:
+  main:
+    build:
+      context: ./main_service
+      dockerfile: Dockerfile
+    container_name: mainserv_app
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://app:mypassword@db:5432/taxi
+      - PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8000/health || exit 1
+      interval: 5s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+
+  db:
+    build: 
+      context: ./db_schema_design
+      dockerfile: Dockerfile
+
+    container_name: taxi_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=taxi
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=mypassword
+    volumes:
+      - ./db_schema_design/data:/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U app -d taxi'"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  
+  
+  

@@ -3,13 +3,17 @@ Homework #1 : bootcamp python advanced
 
 ## Состав корневой директории проекта
 
-db_schema_design/ Схема БД
+db_schema_design/ Создание схемы БД
+
+main_service/ приложение "main service"
 
 .gitignore Шаблоны файлов исключаемых из контроля версий
 
 Architecture.drawio Схема архитектуры приложения
 
 Architecture.drawio.png Схема архитектуры приложения, экспортированная в png
+
+docker-compose.yaml Конфигурация docker-compose
 
 ## Описание архитектуры (по файлу Architecture.drawio)
 
@@ -53,3 +57,4 @@ Architecture.drawio.png Схема архитектуры приложения, 
 Во всех случаях по итогам обработки сообщения, "Main service" высылает ответное уведомление перечисления а).
 в) "Car service" уведомляет "Main service" об изменении состояния заказа, которое может принимать значене из справочника {created, car_assigned, trip_started, trip_finished, cancelled} - все значения кроме первого, то есть допустима передача состояний {car_assigned, trip_started, trip_finished, cancelled}.
 г) "Car service" периодически уведомляет "Main service" об изменении местоположения автомобиля. При этом, если на автомобиль назначен заказ, то добавляется запись в таблицу order_status (при этом указываются актуальные координаты автомобиля, и так как заказ еще не выполнен то столбец finish_at остается пустым)
+
