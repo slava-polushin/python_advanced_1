@@ -1,0 +1,131 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table clients {
+  client_id bigserial [not null, primary key, Note: 'Идентификатор пользователя']
+  client_name varchar [not null, Note: 'Имя клиента']
+  comment text [Note: 'Комментарий']
+  created_at timestamptz [Note: 'Время создания записи клиента']
+  modified_at timestamptz [Note: 'Время изменения записи клиента']
+  Note: 'Клиенты сервиса такси'
+}
+
+// TODO: в будущем можно организовать составные маршруты из нескольких точек, что потребует переработки таблицы (добавление доп. таблиц)
+Table orders {
+  order_id bigserial [primary key, not null, Note: 'Идентификатор заказа']
+  client_id int8 [not null, Note: 'Идентификатор пользователя']
+
+  start_address varchar [Note: 'Адрес начала поездки']
+  start_latitude Numeric(6,5) [Note: 'широта точки старта'] 
+  start_longitude Numeric(6,5) [Note: 'долгота точки старта']
+
+  finish_address varchar [Note: 'Адрес завершения поездки']
+  finish_latitude Numeric(6,5) [Note: 'широта точки финиша'] 
+  finish_longitude Numeric(6,5) [Note: 'долгота точки финиша']
+
+  price Numeric(18,2) [Note: 'цена поездки']
+
+  comment text [Note: 'Комментарий']
+  baby_chair_fl boolean [Note: 'признак необходимости детского кресла']
+  created_at timestamptz [Note: 'Время создания записи клиента']
+  modified_at timestamptz [Note: 'Время изменения записи клиента']
+  Indexes { 
+    client_id
+  }
+  Note: 'Заказы такси'
+}
+  
+Table order_status {
+  id bigserial [primary key, not null, Note: 'Идентификатор записи истории заказа']
+  order_id int8 [not null, Note: 'Идентификатор заказа']
+  status varchar [not null, Note: 'Статус заказа, может быть равен: {created, car_assigned, trip_started, trip_finished, cancelled}']
+  car_id int8 [Note: 'Идентификатор автомобиля']
+  comment text [Note: 'Комментарий']
+  start_at timestamptz [Note: 'Время начала поездки']
+  finish_at timestamptz [Note: 'Время завершения поездки']
+  unpaid_rest Numeric(18,2) [Note: 'Неоплаченный остаток']
+  created_at timestamptz [Note: 'Время создания исторической записи заказа']
+  Indexes { 
+    order_id
+  }
+  Indexes { 
+    car_id
+  }
+  Note: 'История статусов заказов такси. Столбцы начиная с car_id необязательны, и заполняются по мере назначения автомобиля, начала поездки, завершения поездки, оплаты поездки соответственно'
+}
+
+Table cars {
+  car_id bigserial [primary key, not null, Note: 'Идентификатор автомобиля']
+  model varchar [Note: 'Модель автомобиля']
+  color varchar [Note: 'Цвет автомобиля']
+  production_date date [Note: 'Дата производства']
+  vin_number varchar [Note: 'Номер VIN']
+  reg_number varchar [Note: 'Регистрационный номер']
+  comment text [Note: 'Комментарий']
+  created_at timestamptz [Note: 'Время создания записи клиента']
+  modified_at timestamptz [Note: 'Время изменения записи клиента']
+  Note: 'Автомобили такси'
+  Indexes { 
+    model
+  }
+  Indexes { 
+    vin_number
+  }
+  Indexes { 
+    reg_number
+  }
+}
+
+Table car_status {
+  id bigserial [primary key, Note: 'Идентификатор записи состояния автомобиля']
+  car_id int8 [not null, Note: 'Идентификатор автомобиля']
+  status varchar [not null, Note: 'Статус автомобиля, может быть равен: {free, busy, broken, driver_missing}']
+  current_latitude Numeric(6,5) [Note: 'Широта текущего местоположения']
+  current_longitude Numeric(6,5) [Note: 'Долгота текущего местоположения']
+  order_id int8 [Note: 'Заказ, на который назначен автомобиль на текущий момент (может быть пустым)']
+  comment text [Note: 'Комментарий']
+  created_at timestamptz [Note: 'Время создания записи клиента']
+  Indexes { 
+    car_id
+  }
+  Note: 'История состояний автомобиля'
+}
+
+Table car_drivers {
+  id bigserial [primary key, Note: 'Идентификатор записи назначения водителя автомобилю']
+  car_id int8 [not null, Note: 'Идентификатор автомобиля']
+  driver_id int8 [Note: 'Идентификатор водителя']
+  fromdate date [not null, Note: 'Дата, с которой водитель назначен на автомобиль']
+  comment text [Note: 'Комментарий']
+  created_at timestamptz [Note: 'Время создания записи клиента']
+  modified_at timestamptz [Note: 'Время изменения записи клиента']
+  Indexes { 
+    driver_id
+  }
+  Indexes { 
+    car_id
+  }
+  Note: 'Назначение водителей автомобилям'
+}
+
+Table drivers {
+  driver_id bigserial [primary key, Note: 'Идентификатор водителя']
+  driver_name varchar [not null, Note: 'Имя водителя']
+  driver_license varchar [not null, Note: 'Номер водительского удостоверения'] //TODO: вынести водительские удостоверения в отдельную таблицу, т.к. они могут меняться
+  comment text [Note: 'Комментарий']
+  created_at timestamptz [Note: 'Время создания записи клиента']
+  modified_at timestamptz [Note: 'Время изменения записи клиента']
+  Note: 'Водители автомобилей'
+}
+
+
+Ref: orders.client_id > clients.client_id 
+
+Ref: order_status.order_id > orders.order_id 
+Ref: order_status.car_id < cars.car_id 
+
+Ref: car_drivers.car_id < cars.car_id 
+Ref: car_drivers.driver_id < drivers.driver_id
+
+Ref: car_status.car_id > cars.car_id
+Ref: car_status.order_id - orders.order_id
