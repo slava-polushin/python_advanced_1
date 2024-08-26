@@ -84,8 +84,8 @@ class CarDrivers(Base):
 
     id = mapped_column(BigInteger, comment='Идентификатор записи назначения водителя автомобилю')
     car_id = mapped_column(BigInteger, nullable=False, comment='Идентификатор автомобиля')
-    fromdate = mapped_column(Date, nullable=False, comment='Дата, с которой водитель назначен на автомобиль')
     driver_id = mapped_column(BigInteger, comment='Идентификатор водителя')
+    fromdate = mapped_column(Date, nullable=False, comment='Дата, с которой водитель назначен на автомобиль')
     comment = mapped_column(Text, comment='Комментарий')
     created_at = mapped_column(DateTime(True), server_default=text('now()'), comment='Дата создания записи назначения')
     modified_at = mapped_column(DateTime(True), server_default=text('now()'), server_onupdate=text('now()'), comment='Дата изменения записи назначения')
@@ -145,6 +145,13 @@ class CarStatus(Base):
     car: Mapped['Cars'] = relationship('Cars', back_populates='car_status')
     order: Mapped[Optional['Orders']] = relationship('Orders', back_populates='car_status')
 
+
+orderStatusesSet = {'created',
+                    'car_assigned',
+                    'trip_started',
+                    'trip_finished',
+                    'cancelled'
+                    }
 
 class OrderStatus(Base):
     __tablename__ = 'order_status'

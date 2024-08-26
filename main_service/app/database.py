@@ -8,7 +8,11 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 DEBUG_MODE = bool(os.getenv("DEBUG_MODE"))
 
-engine = create_engine(DATABASE_URL)
+if DEBUG_MODE:
+    engine = create_engine(DATABASE_URL, echo=True)
+else:
+    engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

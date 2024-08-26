@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 .python-version
+
+
+main_service/practice/taxi_practice.py

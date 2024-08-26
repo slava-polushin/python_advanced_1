@@ -5,6 +5,8 @@ Homework #1 : bootcamp python advanced
 
 db_schema_design/ Создание схемы БД
 
+main_practice/ контейнер для выполнения операций с системой через REST API
+
 main_service/ приложение "main service"
 
 .gitignore Шаблоны файлов исключаемых из контроля версий

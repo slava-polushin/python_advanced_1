@@ -3,6 +3,7 @@ services:
     build:
       context: ./main_service
       dockerfile: Dockerfile
+    image: main:img
     container_name: mainserv_app
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
@@ -14,11 +15,24 @@ services:
       - PORT=8000
     restart: unless-stopped
     healthcheck:
-      test: curl --fail http://localhost:8000/health || exit 1
+      test: curl --fail http://localhost:8000/mainservice_api/v1/health || exit 1
       interval: 5s
       timeout: 5s
       start_period: 20s
       retries: 5
+
+      
+  main_practice:
+    build:
+      context: ./main_practice
+      dockerfile: Dockerfile
+    container_name: RESTAPI_practice
+    depends_on:
+      main:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: [ "sh", "-c", "./practice/create_data_in_DB.sh"]      
+
 
   db:
     image: postgres:16    

@@ -3,8 +3,6 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime, date
 
-# from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKeyConstraint, Index, Numeric, PrimaryKeyConstraint, String, Text
-
 # Схема таблицы 'clients'
 class ClientBase(BaseModel):
     client_name: str
@@ -39,3 +37,58 @@ class Car(CarBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+# Схема таблицы 'drivers'
+class DriverBase(BaseModel):
+    driver_name: str
+    driver_license: str
+    comment: str
+
+class DriverCreate(DriverBase):
+    pass
+
+class Driver(DriverBase):
+    driver_id: int
+    created_at: datetime
+    modified_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# Схема таблицы 'car_drivers'
+class CarDriverBase(BaseModel):
+    car_id: int
+    driver_id: int
+    fromdate: date
+    comment: str = ""
+
+class CarDriverAdd(CarDriverBase):
+    pass
+
+class CarDriver(CarDriverBase):
+    id: int
+    created_at: datetime
+    modified_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Схемы таблиц 'orders', 'order_status'
+class OrderBase(BaseModel):
+    # client: Client
+    client_id: int
+    start_address: str
+    finish_address: str
+    baby_chair_fl: bool = False
+    comment: str = ""
+
+class OrderCreate(OrderBase):
+    status_comment: str
+    # status: str 
+    status:str = 'created'
+
+class Order(OrderBase):
+    order_id: int
+    client: Client
+    created_at: datetime
+    modified_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
