@@ -7,7 +7,7 @@ sqlacodegen_v2 postgresql://app:mypassword@localhost:5432/taxi
 
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKeyConstraint, Index, Numeric, PrimaryKeyConstraint, String, Text, text
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKeyConstraint, Index, Numeric, PrimaryKeyConstraint, UniqueConstraint, String, Text, text
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 from sqlalchemy.orm.base import Mapped
 
@@ -77,8 +77,8 @@ class CarDrivers(Base):
         ForeignKeyConstraint(['car_id'], ['cars.car_id'], name='car_drivers_car_id_fkey'),
         ForeignKeyConstraint(['driver_id'], ['drivers.driver_id'], name='car_drivers_driver_id_fkey'),
         PrimaryKeyConstraint('id', name='car_drivers_pkey'),
-        Index('car_drivers_car_id_idx', 'car_id'),
-        Index('car_drivers_driver_id_idx', 'driver_id'),
+        UniqueConstraint('car_id', 'fromdate', name='car_drivers_altkey'),
+        Index('car_drivers_car_id_idx', 'car_id', 'fromdate'),
         {'comment': 'Назначение водителей автомобилям'}
     )
 

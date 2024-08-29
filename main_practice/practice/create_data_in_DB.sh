@@ -27,6 +27,13 @@ then
     curl -X POST -H "Content-Type: application/json" -d '{"driver_name":"Антонов Антон Антонович", "driver_license":"АА789012", "comment":""}' http://main:8000/mainservice_api/v1/drivers/ | tee -a "$LOG_FILE"
 
 # Назначение водителей автомобилям
+    curl -X POST -H "Content-Type: application/json" -d '{"car_id":1, "driver_id":1, "fromdate": "2020-01-01", "comment":"Первое назначение машины 1"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"car_id":1, "driver_id":2, "fromdate": "2022-01-01", "comment":"2е назначение машины 1"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"car_id":1, "driver_id":3, "fromdate": "2024-01-01", "comment":"3е назначение машины 1"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"car_id":2, "driver_id":1, "fromdate": "2020-01-01", "comment":"Первое назначение машины 2"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"car_id":3, "driver_id":2, "fromdate": "2020-01-01", "comment":"Первое назначение машины 3"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"car_id":4, "driver_id":4, "fromdate": "2020-01-01", "comment":"Первое назначение машины 4"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"car_id":5, "driver_id":7, "fromdate": "2020-01-01", "comment":"Первое назначение машины 5"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
 
 # Создание заявки на поездку в такси
     curl -X POST -H "Content-Type: application/json" -d '{"client_id": 3, "start_address": "Киров, Азина 41", "finish_address": "Киров, Попова 62", "baby_chair_fl": false, "comment": "Первый заказ в службе такси", "status_comment": "Заказ размещён, ожидает назначения автомобиля"}'  http://main:8000/mainservice_api/v1/orders/ | tee -a "$LOG_FILE"

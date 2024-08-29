@@ -1,8 +1,8 @@
 """Added tables
 
-Revision ID: d8c7073b5b06
+Revision ID: 524a6bfc02c8
 Revises: 
-Create Date: 2024-08-21 00:24:07.735136
+Create Date: 2024-08-29 22:09:34.115874
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd8c7073b5b06'
+revision: str = '524a6bfc02c8'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -58,18 +58,18 @@ def upgrade() -> None:
     op.create_table('car_drivers',
     sa.Column('id', sa.BigInteger(), nullable=False, comment='Идентификатор записи назначения водителя автомобилю'),
     sa.Column('car_id', sa.BigInteger(), nullable=False, comment='Идентификатор автомобиля'),
-    sa.Column('fromdate', sa.Date(), nullable=False, comment='Дата, с которой водитель назначен на автомобиль'),
     sa.Column('driver_id', sa.BigInteger(), nullable=True, comment='Идентификатор водителя'),
+    sa.Column('fromdate', sa.Date(), nullable=False, comment='Дата, с которой водитель назначен на автомобиль'),
     sa.Column('comment', sa.Text(), nullable=True, comment='Комментарий'),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True, comment='Дата создания записи назначения'),
     sa.Column('modified_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True, comment='Дата изменения записи назначения'),
     sa.ForeignKeyConstraint(['car_id'], ['cars.car_id'], name='car_drivers_car_id_fkey'),
     sa.ForeignKeyConstraint(['driver_id'], ['drivers.driver_id'], name='car_drivers_driver_id_fkey'),
     sa.PrimaryKeyConstraint('id', name='car_drivers_pkey'),
+    sa.UniqueConstraint('car_id', 'fromdate', name='car_drivers_altkey'),
     comment='Назначение водителей автомобилям'
     )
-    op.create_index('car_drivers_car_id_idx', 'car_drivers', ['car_id'], unique=False)
-    op.create_index('car_drivers_driver_id_idx', 'car_drivers', ['driver_id'], unique=False)
+    op.create_index('car_drivers_car_id_idx', 'car_drivers', ['car_id', 'fromdate'], unique=False)
     op.create_table('orders',
     sa.Column('order_id', sa.BigInteger(), nullable=False, comment='Идентификатор заказа'),
     sa.Column('client_id', sa.BigInteger(), nullable=False, comment='Идентификатор пользователя'),
@@ -135,7 +135,6 @@ def downgrade() -> None:
     op.drop_table('car_status')
     op.drop_index('orders_client_id_idx', table_name='orders')
     op.drop_table('orders')
-    op.drop_index('car_drivers_driver_id_idx', table_name='car_drivers')
     op.drop_index('car_drivers_car_id_idx', table_name='car_drivers')
     op.drop_table('car_drivers')
     op.drop_table('drivers')

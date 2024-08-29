@@ -3,7 +3,6 @@ services:
     build:
       context: ./main_service
       dockerfile: Dockerfile
-    image: main:img
     container_name: mainserv_app
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
