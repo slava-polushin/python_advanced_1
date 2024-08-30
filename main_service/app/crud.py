@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.sql import text
 
 from fastapi.exceptions import HTTPException
@@ -84,29 +84,24 @@ def create_driver_in_db(db: Session, driver: DriverCreate) -> Driver:
 
 # Процедуры для обработки таблицы car_drivers
 def create_cardriver_in_db(db: Session, cardriver: CarDriverAdd) -> CarDriver:
-    stmt = text("""
-select count(1) as cnt
-  from (
-select cd.car_id, 
-       cd.driver_id, 
-	   cd.fromdate,
-	   cd.id,
-	   last_value(cd.id) over(partition by cd.car_id order by cd.fromdate) last_id
-  from car_drivers cd 
- where cd.fromdate <= :fromdate
-       ) x
- where id = last_id
-   and (x.car_id != :car_id and x.driver_id = :driver_id) -- Водитель назначен другой машине       
-        """)
+    subquery = db.query(CarDriverModel).filter(
+        CarDriverModel.fromdate <= cardriver.fromdate).subquery()
 
-    result = db.execute(stmt, params={
-        "car_id": cardriver.car_id,
-        "driver_id": cardriver.driver_id,
-        "fromdate": cardriver.fromdate
-    }
-    ).fetchone()
+    subquery = db.query(
+        subquery,
+        func.dense_rank().over(
+            order_by=subquery.c.fromdate.desc(),
+            partition_by=subquery.c.car_id
+        ).label('rnk')
+    ).subquery()
 
-    if result[0] > 0:
+    busy_driver_fl = db.query(subquery).filter(
+        subquery.c.rnk == 1,
+        subquery.c.driver_id == cardriver.driver_id,
+        subquery.c.car_id != cardriver.car_id
+    ).count()
+
+    if busy_driver_fl > 0:
         raise HTTPException(
             status_code=404, detail="Driver is assigned to other car. Please unassign first")
 
@@ -146,48 +141,40 @@ def get_driver_for_car(db: Session, car_id: int, fromdate: date) -> CarDriver:
 
 
 def get_car_for_driver(db: Session, driver_id: int, fromdate: date) -> CarDriver:
-    stmt = text("""
-select id,
-       car_id, 
-       driver_id, 
-	   fromdate,
-       comment,
-       created_at,
-       modified_at
-  from (
-select cd.car_id, 
-       cd.driver_id, 
-	   cd.fromdate,
-       cd.comment,
-       cd.created_at,
-       cd.modified_at,
-	   cd.id,
-	   first_value(cd.id) over(partition by cd.car_id order by cd.fromdate desc) last_id 
-  from car_drivers cd 
- where cd.fromdate <= :fromdate
-       ) x
- where id = last_id
-   and x.driver_id = :driver_id -- Поиск водителя в итоге назначенного для машины
-        """)
+    subquery = db.query(CarDriverModel).filter(
+        CarDriverModel.fromdate <= fromdate).subquery()
 
-    result = db.execute(stmt, params={
-        "driver_id": driver_id,
-        "fromdate": fromdate
-    }
-    ).fetchone()
+    subquery = db.query(
+        subquery,
+        func.dense_rank().over(
+            order_by=subquery.c.fromdate.desc(),
+            partition_by=subquery.c.car_id
+        ).label('rnk')
+    ).subquery()
 
-    if result == None:
-        raise HTTPException(
-            status_code=404, detail=f"Car for driver {driver_id} on date {fromdate} not found")
+    result = db.query(subquery).filter(
+        subquery.c.rnk == 1,
+        subquery.c.driver_id == driver_id
+    ).first()
+
+    if result is None:
+        return None
+
+    car = db.query(CarModel).filter(
+        CarModel.car_id == result._mapping['car_id']).first()
+    driver = db.query(DriverModel).filter(
+        DriverModel.driver_id == result._mapping['driver_id']).first()
 
     return CarDriverModel(
-        id=result[0],
-        car_id=result[1],
-        driver_id=result[2],
-        fromdate=result[3],
-        comment=result[4],
-        created_at=result[5],
-        modified_at=result[6]
+        id=result._mapping['id'],
+        car=car,
+        car_id=result._mapping['car_id'],
+        driver=driver,
+        driver_id=result._mapping['driver_id'],
+        fromdate=result._mapping['fromdate'],
+        comment=result._mapping['comment'],
+        created_at=result._mapping['created_at'],
+        modified_at=result._mapping['modified_at'],
     )
 
 
