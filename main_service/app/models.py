@@ -7,7 +7,7 @@ sqlacodegen_v2 postgresql://app:mypassword@localhost:5432/taxi
 
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKeyConstraint, Index, Numeric, PrimaryKeyConstraint, String, Text, text
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKeyConstraint, Index, Numeric, PrimaryKeyConstraint, UniqueConstraint, String, Text, text
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 from sqlalchemy.orm.base import Mapped
 
@@ -77,15 +77,15 @@ class CarDrivers(Base):
         ForeignKeyConstraint(['car_id'], ['cars.car_id'], name='car_drivers_car_id_fkey'),
         ForeignKeyConstraint(['driver_id'], ['drivers.driver_id'], name='car_drivers_driver_id_fkey'),
         PrimaryKeyConstraint('id', name='car_drivers_pkey'),
-        Index('car_drivers_car_id_idx', 'car_id'),
-        Index('car_drivers_driver_id_idx', 'driver_id'),
+        UniqueConstraint('car_id', 'fromdate', name='car_drivers_altkey'),
+        Index('car_drivers_car_id_idx', 'car_id', 'fromdate'),
         {'comment': 'Назначение водителей автомобилям'}
     )
 
     id = mapped_column(BigInteger, comment='Идентификатор записи назначения водителя автомобилю')
     car_id = mapped_column(BigInteger, nullable=False, comment='Идентификатор автомобиля')
-    fromdate = mapped_column(Date, nullable=False, comment='Дата, с которой водитель назначен на автомобиль')
     driver_id = mapped_column(BigInteger, comment='Идентификатор водителя')
+    fromdate = mapped_column(Date, nullable=False, comment='Дата, с которой водитель назначен на автомобиль')
     comment = mapped_column(Text, comment='Комментарий')
     created_at = mapped_column(DateTime(True), server_default=text('now()'), comment='Дата создания записи назначения')
     modified_at = mapped_column(DateTime(True), server_default=text('now()'), server_onupdate=text('now()'), comment='Дата изменения записи назначения')
@@ -145,6 +145,13 @@ class CarStatus(Base):
     car: Mapped['Cars'] = relationship('Cars', back_populates='car_status')
     order: Mapped[Optional['Orders']] = relationship('Orders', back_populates='car_status')
 
+
+orderStatusesSet = {'created',
+                    'car_assigned',
+                    'trip_started',
+                    'trip_finished',
+                    'cancelled'
+                    }
 
 class OrderStatus(Base):
     __tablename__ = 'order_status'
