@@ -1,0 +1,17 @@
+# Дополнительное приложение для контроля работы redis, 
+# не является функциональной частью проекта и может быть отключено 
+# без последствий для работоспособности приложения
+services:
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: redisinsight_srv
+    ports:
+      - "5540:5540"
+    environment:
+      - REDIS_HOST=redis
+    volumes:
+      - redisinsight_data:/db
+    restart: unless-stopped
+
+volumes:
+  redisinsight_data:  

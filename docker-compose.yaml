@@ -48,13 +48,6 @@ services:
       start_period: 10s
       retries: 3
 
-
-
-
-
-
-
-
   price:
     build:
       context: ./price_service
@@ -71,17 +64,6 @@ services:
       timeout: 5s
       start_period: 10s
       retries: 3
-
-
-
-
-
-
-
-
-
-
-
 
   main_practice:
     build:
@@ -132,23 +114,14 @@ services:
         timeout: 10s
         retries: 5
         start_period: 10s
-      
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    container_name: redisinsight_srv
-    ports:
-      - "5540:5540"
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
-    volumes:
-      - redisinsight_data:/db
-    restart: unless-stopped
+
+  # Дополнительная функциональность для отладки проекта
+  # Может быть отключена без последствий для работоспособности приложения  
+include: 
+  - docker-redisinsight.yaml
 
 volumes:
   postgres_data:
   redis_data:
-  redisinsight_data:  
   
   
