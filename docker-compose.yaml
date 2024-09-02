@@ -7,11 +7,22 @@ services:
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
     depends_on:
+      coordinates:
+        condition: service_healthy
+      price:
+        condition: service_healthy
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       - DATABASE_URL=postgresql://app:mypassword@db:5432/taxi
       - PORT=8000
+      - COORDINATES_SERVICE_URL=http://coordinates:8001/coordinates_api/v1/get-coordinates
+      - COORDINATES_REDIS_URL=redis://redis:6379/1
+      - PRICE_SERVICE_URL=http://price:8002/price_api/v1/get-price
+      - PRICE_REDIS_URL=redis://redis:6379/2
+
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8000/mainservice_api/v1/health || exit 1
@@ -20,7 +31,58 @@ services:
       start_period: 20s
       retries: 5
 
-      
+  coordinates:
+    build:
+      context: ./coordinates_service
+      dockerfile: Dockerfile
+    container_name: coordinates_srv
+    ports:
+      - "${PORT:-8001}:${PORT:-8001}"
+    environment:
+      - PORT=8001
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8001/coordinates_api/v1/health || exit 1
+      interval: 2s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+
+
+
+
+
+
+
+  price:
+    build:
+      context: ./price_service
+      dockerfile: Dockerfile
+    container_name: price_srv
+    ports:
+      - "${PORT:-8002}:${PORT:-8002}"
+    environment:
+      - PORT=8002
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8002/price_api/v1/health || exit 1
+      interval: 2s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+
+
+
+
+
+
+
+
+
+
+
   main_practice:
     build:
       context: ./main_practice
@@ -43,7 +105,7 @@ services:
       - POSTGRES_USER=app
       - POSTGRES_PASSWORD=mypassword
     volumes:
-      - ./db_schema_design/data:/data
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test:
@@ -56,6 +118,37 @@ services:
       retries: 5
       start_period: 10s
 
-  
+  redis:
+      image: redis:7.2-alpine
+      container_name: redis_srv
+      ports:
+        - "6379:6379"
+      volumes:
+        - redis_data:/data
+      restart: unless-stopped
+      healthcheck:
+        test: [ "CMD", "redis-cli", "ping" ]
+        interval: 10s
+        timeout: 10s
+        retries: 5
+        start_period: 10s
+      
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: redisinsight_srv
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+    volumes:
+      - redisinsight_data:/db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  redisinsight_data:  
   
   

@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
-from sqlalchemy.sql import text
 
 from fastapi.exceptions import HTTPException
 
@@ -29,7 +28,11 @@ from app.schemas import (
     Client,
     Car,
     Driver,
+
+    CoordinatesBase,
 )
+
+from app.tasks import get_coordinates_via_str, get_price_via_coordinates
 
 
 def get_client(db: Session, client_id: int):
@@ -185,11 +188,28 @@ def create_order_in_db(db: Session, order: OrderCreate) -> Order:
     client = db.query(ClientModel).filter(
         ClientModel.client_id == order.client_id).first()
 
+    start_coordinates = get_coordinates_via_str(order.start_address)
+    finish_coordinates = get_coordinates_via_str(order.finish_address)
+
+    coordinates = CoordinatesBase(
+        start_latitude=start_coordinates['latitude'],
+        start_longitude=start_coordinates['longitude'],
+        finish_latitude=finish_coordinates['latitude'],
+        finish_longitude=finish_coordinates['longitude']
+    )
+    price = get_price_via_coordinates(coordinates=coordinates)
+
     db_order = OrderModel(
         client=client,
         start_address=order.start_address,
+        start_latitude=start_coordinates['latitude'],
+        start_longitude=start_coordinates['longitude'],
         finish_address=order.finish_address,
+        finish_latitude=finish_coordinates['latitude'],
+        finish_longitude=finish_coordinates['longitude'],
+        price=price,
         baby_chair_fl=order.baby_chair_fl,
+        # status='created',
         comment=order.comment,
     )
     db.add(db_order)

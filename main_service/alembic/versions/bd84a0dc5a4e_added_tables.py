@@ -1,8 +1,8 @@
 """Added tables
 
-Revision ID: 524a6bfc02c8
+Revision ID: bd84a0dc5a4e
 Revises: 
-Create Date: 2024-08-29 22:09:34.115874
+Create Date: 2024-09-01 23:04:47.489250
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '524a6bfc02c8'
+revision: str = 'bd84a0dc5a4e'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -74,11 +74,11 @@ def upgrade() -> None:
     sa.Column('order_id', sa.BigInteger(), nullable=False, comment='Идентификатор заказа'),
     sa.Column('client_id', sa.BigInteger(), nullable=False, comment='Идентификатор пользователя'),
     sa.Column('start_address', sa.String(), nullable=False, comment='Адрес начала поездки'),
-    sa.Column('start_latitude', sa.Numeric(precision=6, scale=5), nullable=True, comment='широта точки старта'),
-    sa.Column('start_longitude', sa.Numeric(precision=6, scale=5), nullable=True, comment='долгота точки старта'),
+    sa.Column('start_latitude', sa.Numeric(precision=7, scale=5), nullable=True, comment='широта точки старта'),
+    sa.Column('start_longitude', sa.Numeric(precision=8, scale=5), nullable=True, comment='долгота точки старта'),
     sa.Column('finish_address', sa.String(), nullable=True, comment='Адрес завершения поездки'),
-    sa.Column('finish_latitude', sa.Numeric(precision=6, scale=5), nullable=True, comment='широта точки финиша'),
-    sa.Column('finish_longitude', sa.Numeric(precision=6, scale=5), nullable=True, comment='долгота точки финиша'),
+    sa.Column('finish_latitude', sa.Numeric(precision=7, scale=5), nullable=True, comment='широта точки финиша'),
+    sa.Column('finish_longitude', sa.Numeric(precision=8, scale=5), nullable=True, comment='долгота точки финиша'),
     sa.Column('price', sa.Numeric(precision=18, scale=2), nullable=True, comment='цена поездки'),
     sa.Column('comment', sa.Text(), nullable=True, comment='Комментарий'),
     sa.Column('baby_chair_fl', sa.Boolean(), nullable=True, comment='признак необходимости детского кресла'),
@@ -93,8 +93,8 @@ def upgrade() -> None:
     sa.Column('id', sa.BigInteger(), nullable=False, comment='Идентификатор записи состояния автомобиля'),
     sa.Column('car_id', sa.BigInteger(), nullable=False, comment='Идентификатор автомобиля'),
     sa.Column('status', sa.String(), nullable=False, comment='Статус автомобиля, может быть равен: {free, busy, broken, driver_missing}'),
-    sa.Column('current_latitude', sa.Numeric(precision=6, scale=5), nullable=True, comment='Широта текущего местоположения'),
-    sa.Column('current_longitude', sa.Numeric(precision=6, scale=5), nullable=True, comment='Долгота текущего местоположения'),
+    sa.Column('current_latitude', sa.Numeric(precision=7, scale=5), nullable=True, comment='Широта текущего местоположения'),
+    sa.Column('current_longitude', sa.Numeric(precision=8, scale=5), nullable=True, comment='Долгота текущего местоположения'),
     sa.Column('order_id', sa.BigInteger(), nullable=True, comment='Заказ, на который назначен автомобиль на текущий момент (может быть пустым)'),
     sa.Column('comment', sa.Text(), nullable=True, comment='Комментарий'),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True, comment='Дата создания исторической записи заказа'),
