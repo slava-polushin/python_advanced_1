@@ -65,18 +65,6 @@ services:
       start_period: 10s
       retries: 3
 
-  main_practice:
-    build:
-      context: ./main_practice
-      dockerfile: Dockerfile
-    container_name: RESTAPI_practice
-    depends_on:
-      main:
-        condition: service_healthy
-    restart: "no"
-    entrypoint: [ "sh", "-c", "./practice/create_data_in_DB.sh"]      
-
-
   db:
     image: postgres:16    
     container_name: taxi_db
@@ -119,6 +107,7 @@ services:
   # Может быть отключена без последствий для работоспособности приложения  
 include: 
   - docker-redisinsight.yaml
+  - docker-main_practice.yaml
 
 volumes:
   postgres_data:

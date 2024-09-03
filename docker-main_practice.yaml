@@ -1,0 +1,13 @@
+# Дополнительный контейнер с записью команд к сервисам приложения, 
+# для целей отладки. Может быть исключен из проекта без потери функциональности
+services:
+  main_practice:
+    build:
+      context: ./main_practice
+      dockerfile: Dockerfile
+    container_name: RESTAPI_practice
+    depends_on:
+      main:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: [ "sh", "-c", "./practice/create_data_in_DB.sh"]      
