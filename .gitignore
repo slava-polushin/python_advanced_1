@@ -130,5 +130,5 @@ dmypy.json
 
 .python-version
 
-
+.vscode
 main_service/practice/taxi_practice.py

@@ -78,17 +78,31 @@ class OrderBase(BaseModel):
     start_address: str
     finish_address: str
     baby_chair_fl: bool = False
+    status: str = "created"
     comment: str = ""
 
 class OrderCreate(OrderBase):
     status_comment: str
-    # status: str 
-    status:str = 'created'
+    # status:str = 'created'
 
 class Order(OrderBase):
     order_id: int
     client: Client
+    start_latitude: float
+    start_longitude: float
+    finish_latitude: float
+    finish_longitude: float
+    price: float
+
     created_at: datetime
     modified_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# Схема для обмена данными с coordinates_service
+class CoordinatesBase(BaseModel):
+    start_latitude: float
+    start_longitude: float
+    finish_latitude: float
+    finish_longitude: float

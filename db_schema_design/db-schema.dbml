@@ -16,12 +16,12 @@ Table orders {
   client_id int8 [not null, Note: 'Идентификатор пользователя']
 
   start_address varchar [Note: 'Адрес начала поездки']
-  start_latitude Numeric(6,5) [Note: 'широта точки старта'] 
-  start_longitude Numeric(6,5) [Note: 'долгота точки старта']
+  start_latitude Numeric(7,5) [Note: 'широта точки старта'] 
+  start_longitude Numeric(8,5) [Note: 'долгота точки старта']
 
   finish_address varchar [Note: 'Адрес завершения поездки']
-  finish_latitude Numeric(6,5) [Note: 'широта точки финиша'] 
-  finish_longitude Numeric(6,5) [Note: 'долгота точки финиша']
+  finish_latitude Numeric(7,5) [Note: 'широта точки финиша'] 
+  finish_longitude Numeric(8,5) [Note: 'долгота точки финиша']
 
   price Numeric(18,2) [Note: 'цена поездки']
 
@@ -80,8 +80,8 @@ Table car_status {
   id bigserial [primary key, Note: 'Идентификатор записи состояния автомобиля']
   car_id int8 [not null, Note: 'Идентификатор автомобиля']
   status varchar [not null, Note: 'Статус автомобиля, может быть равен: {free, busy, broken, driver_missing}']
-  current_latitude Numeric(6,5) [Note: 'Широта текущего местоположения']
-  current_longitude Numeric(6,5) [Note: 'Долгота текущего местоположения']
+  current_latitude Numeric(7,5) [Note: 'Широта текущего местоположения']
+  current_longitude Numeric(8,5) [Note: 'Долгота текущего местоположения']
   order_id int8 [Note: 'Заказ, на который назначен автомобиль на текущий момент (может быть пустым)']
   comment text [Note: 'Комментарий']
   created_at timestamptz [Note: 'Время создания записи клиента']

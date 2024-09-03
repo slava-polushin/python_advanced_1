@@ -1,12 +1,9 @@
-import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
 
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
-DEBUG_MODE = bool(os.getenv("DEBUG_MODE"))
+from app.config import DATABASE_URL
+from app.config import DEBUG_MODE
 
 if DEBUG_MODE:
     engine = create_engine(DATABASE_URL, echo=True)
