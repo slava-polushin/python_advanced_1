@@ -20,11 +20,13 @@ from app.schemas import (
     DriverCreate,
     CarDriverAdd,
     OrderCreate,
+    OrderStatusAdd,
     Client,
     Car,
     Driver,
     CarDriver,
     Order,
+    OrderStatus,
     Client,
     Car,
     Driver,
@@ -32,7 +34,7 @@ from app.schemas import (
     CoordinatesBase,
 )
 
-from app.tasks import get_coordinates_via_str, get_price_via_coordinates
+from app.tasks.tasks import get_coordinates_via_str, get_price_via_coordinates
 
 
 def get_client(db: Session, client_id: int):
@@ -40,10 +42,7 @@ def get_client(db: Session, client_id: int):
 
 
 def create_client_in_db(db: Session, client: ClientCreate) -> Client:
-    db_client = ClientModel(
-        client_name=client.client_name,
-        comment=client.comment,
-    )
+    db_client = ClientModel(**client.model_dump())
     db.add(db_client)
     db.commit()
     db.refresh(db_client)
@@ -55,14 +54,7 @@ def get_car(db: Session, car_id: int):
 
 
 def create_car_in_db(db: Session, car: CarCreate) -> Car:
-    db_car = CarModel(
-        model=car.model,
-        color=car.color,
-        production_date=car.production_date,
-        vin_number=car.vin_number,
-        reg_number=car.reg_number,
-        comment=car.comment,
-    )
+    db_car = CarModel(**car.model_dump())
     db.add(db_car)
     db.commit()
     db.refresh(db_car)
@@ -74,11 +66,7 @@ def get_driver(db: Session, driver_id: int):
 
 
 def create_driver_in_db(db: Session, driver: DriverCreate) -> Driver:
-    db_driver = DriverModel(
-        driver_name=driver.driver_name,
-        driver_license=driver.driver_license,
-        comment=driver.comment,
-    )
+    db_driver = DriverModel(**driver.model_dump())
     db.add(db_driver)
     db.commit()
     db.refresh(db_driver)
@@ -113,12 +101,7 @@ def create_cardriver_in_db(db: Session, cardriver: CarDriverAdd) -> CarDriver:
         CarDriverModel.car_id == cardriver.car_id).order_by(desc(CarDriverModel.id)).first()
 
     if db_cardriver == None:
-        db_cardriver = CarDriverModel(
-            car_id=cardriver.car_id,
-            driver_id=cardriver.driver_id,
-            fromdate=cardriver.fromdate,
-            comment=cardriver.comment
-        )
+        db_cardriver = CarDriverModel(**cardriver.model_dump())
 
     # Требуется установка водителя в записи с существующей датой
     elif db_cardriver.fromdate == cardriver.fromdate:
@@ -126,12 +109,7 @@ def create_cardriver_in_db(db: Session, cardriver: CarDriverAdd) -> CarDriver:
 
     # Требуется установка водителя в записи с новой датой
     elif db_cardriver.driver_id != cardriver.driver_id:
-        db_cardriver = CarDriverModel(
-            car_id=cardriver.car_id,
-            driver_id=cardriver.driver_id,
-            fromdate=cardriver.fromdate,
-            comment=cardriver.comment
-        )
+        db_cardriver = CarDriverModel(**cardriver.model_dump())
 
     db.add(db_cardriver)
     db.commit()
@@ -163,27 +141,12 @@ def get_car_for_driver(db: Session, driver_id: int, fromdate: date) -> CarDriver
     if result is None:
         return None
 
-    car = db.query(CarModel).filter(
-        CarModel.car_id == result._mapping['car_id']).first()
-    driver = db.query(DriverModel).filter(
-        DriverModel.driver_id == result._mapping['driver_id']).first()
-
-    return CarDriverModel(
-        id=result._mapping['id'],
-        car=car,
-        car_id=result._mapping['car_id'],
-        driver=driver,
-        driver_id=result._mapping['driver_id'],
-        fromdate=result._mapping['fromdate'],
-        comment=result._mapping['comment'],
-        created_at=result._mapping['created_at'],
-        modified_at=result._mapping['modified_at'],
-    )
+    return CarDriver(**result._asdict())
 
 
 # Процедуры для обработки таблицы orders
 
-
+# Создание заказа на поездку
 def create_order_in_db(db: Session, order: OrderCreate) -> Order:
     client = db.query(ClientModel).filter(
         ClientModel.client_id == order.client_id).first()
@@ -217,7 +180,7 @@ def create_order_in_db(db: Session, order: OrderCreate) -> Order:
     db_order_status = OrderStatusModel(
         order=db_order,
         status=order.status,
-
+        unpaid_rest=price,
         comment=order.status_comment
     )
 
@@ -227,3 +190,26 @@ def create_order_in_db(db: Session, order: OrderCreate) -> Order:
     db.refresh(db_order_status)
 
     return Order.model_validate(db_order)
+
+# Состояние заказа
+
+def get_orderstatus(db: Session, order_id: int) -> OrderStatus:
+    # Поиск последнего состояния для заказа
+    db_orderstatus = db.query(OrderStatusModel).filter(
+        OrderStatusModel.order_id == order_id).order_by(desc(OrderStatusModel.id)).first()
+
+    return OrderStatus.model_validate(db_orderstatus)
+
+
+def add_new_orderstatus_in_db(db: Session, new_orderstatus: OrderStatusAdd) -> OrderStatus:
+    db_order_status = OrderStatusModel(**new_orderstatus.model_dump())
+    db.add(db_order_status)
+    db.commit()
+    db.refresh(db_order_status)
+
+    return OrderStatus.model_validate(db_order_status)
+
+
+# Оплата заказа
+def pay_order_in_db(db: Session, order_id: int, sum_to_pay: float) -> OrderStatus:
+    pass

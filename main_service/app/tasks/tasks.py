@@ -1,11 +1,16 @@
 import json
 import httpx
 
-from pydantic import BaseModel
+# from pydantic import BaseModel
+
+from app.tasks.celery_config import app
+
 
 from app.config import COORDINATES_SERVICE_URL
 from app.config import PRICE_SERVICE_URL
 from app.redis_client import redis_client_coordinates, redis_client_price
+
+from app.rabbitmq_client import APP_QUEUE_MAP, rabbitmq_client
 
 from app.schemas import CoordinatesBase
 
@@ -51,3 +56,12 @@ def get_price_via_coordinates(coordinates: CoordinatesBase):
     # Срок жизни значения в кеше - 1 час
     redis_client_price.set(coordinates_key, price, ex=3600)
     return price
+
+
+@app.task(serializer='json')
+def save_payinfo(message):
+
+    # Add your code here
+
+    print(f"Task is Recieved: {message} from the backend")
+    return

@@ -9,9 +9,11 @@ services:
     depends_on:
       coordinates:
         condition: service_healthy
+      db:
+        condition: service_healthy
       price:
         condition: service_healthy
-      db:
+      rabbitmq:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -22,6 +24,8 @@ services:
       - COORDINATES_REDIS_URL=redis://redis:6379/1
       - PRICE_SERVICE_URL=http://price:8002/price_api/v1/get-price
       - PRICE_REDIS_URL=redis://redis:6379/2
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - CELERY_BROKER_URL=redis://redis:6379/0
 
     restart: unless-stopped
     healthcheck:
@@ -65,6 +69,19 @@ services:
       start_period: 10s
       retries: 3
 
+  pay:
+    build:
+      context: ./pay_service
+      dockerfile: Dockerfile
+    container_name: pay_srv
+    environment:
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
   db:
     image: postgres:16    
     container_name: taxi_db
@@ -103,11 +120,59 @@ services:
         retries: 5
         start_period: 10s
 
+  rabbitmq:
+    image: rabbitmq:3.13.6-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  celery_worker:
+    build:
+      context: ./main_service
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    environment:
+      - DATABASE_URL=postgresql://taxi:mypassword@db:5432/mydatabase
+      - COORDINATES_SERVICE_URL=http://coordinates:8001/coordinates_api/v1/get-coordinates
+      - REDIS_URL=redis://redis:6379/1
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+      main:
+        condition: service_healthy
+    command:
+      [
+        "celery",
+        "-A",
+        "app.tasks.celery_config",
+        "worker",
+        "--pool=gevent",
+        "--loglevel=info"
+        #,
+        # "-Q",
+        # "default,pay_approve_queue"
+      ]
+    restart: unless-stopped
+
   # Дополнительная функциональность для отладки проекта
   # Может быть отключена без последствий для работоспособности приложения  
 include: 
-  - docker-redisinsight.yaml
+  - docker-flower.yaml
   - docker-main_practice.yaml
+  - docker-redisinsight.yaml
 
 volumes:
   postgres_data:
