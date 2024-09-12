@@ -32,9 +32,12 @@ from app.schemas import (
     Driver,
 
     CoordinatesBase,
+    PayInfo,
 )
 
 from app.tasks.tasks import get_coordinates_via_str, get_price_via_coordinates
+
+from app.rabbitmq_client import APP_QUEUE_MAP, rabbitmq_client
 
 
 def get_client(db: Session, client_id: int):
@@ -210,6 +213,39 @@ def add_new_orderstatus_in_db(db: Session, new_orderstatus: OrderStatusAdd) -> O
     return OrderStatus.model_validate(db_order_status)
 
 
-# Оплата заказа
-def pay_order_in_db(db: Session, order_id: int, sum_to_pay: float) -> OrderStatus:
-    pass
+"""Блок интерфейсов обслуживающих оплату заказа"""
+
+
+# Заявка на оплату заказа. Сообщение через rabbitMQ от main_service к pay_service
+def pay_order_via_queue(pay_info: PayInfo, orderstatus: OrderStatus) -> PayInfo:
+    message = {"order_status": orderstatus.model_dump(),
+               "pay_sum": pay_info.pay_sum}
+
+    routing_key = APP_QUEUE_MAP["pay_request_queue"]
+
+    if routing_key:
+        rabbitmq_client.publish(routing_key, message)
+
+    print('### PAYING MESSAGE SENT!!!')
+
+
+    from app.config import RABBITMQ_URL, CELERY_BROKER_URL
+
+    from celery.app import Celery
+
+
+    app = Celery(
+        "tasks",
+        broker_url=CELERY_BROKER_URL
+    )
+    app.send_task(
+        name='app.tasks.tasks.save_payinfo',
+        args=(1234, 1) 
+    )
+
+    return pay_info
+
+# # Обработка уведомления о корректной оплате заказа
+# def pay_order_in_db(db: Session, order_id: int, sum_to_pay: float) -> OrderStatus:
+#     pass
+

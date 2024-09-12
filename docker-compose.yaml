@@ -77,8 +77,12 @@ services:
     environment:
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
       - PYTHONUNBUFFERED=1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
 
@@ -160,10 +164,9 @@ services:
         "app.tasks.celery_config",
         "worker",
         "--pool=gevent",
-        "--loglevel=info"
-        #,
-        # "-Q",
-        # "default,pay_approve_queue"
+        "--loglevel=info",
+        "-Q",
+        "default"
       ]
     restart: unless-stopped
 

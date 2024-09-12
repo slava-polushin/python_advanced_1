@@ -5,22 +5,24 @@ from app.redis_client import redis_client_coordinates, redis_client_price
 import logging
 
 logger = logging.getLogger(__name__)
-app = Celery(
+celery_app = Celery(
     "tasks",
     broker=CELERY_BROKER_URL,
-    include=["app.tasks.tasks"],
+    include=[
+        "app.tasks.tasks", 
+        # "app.tasks.analyze_job",
+    ],
 )
 
 # Define queues (no need to specify exchange or routing key)
-app.conf.task_queues = {
+celery_app.conf.task_queues = {
     "default": {},  # Default queue for general tasks
-    APP_QUEUE_MAP["pay_approve_queue"]: {},  # Default queue for accepted payings
     # "cron_tasks": {},  # Queue specifically for cron tasks
 }
 
 # Configure task routes
-app.conf.task_routes = {
-    "app.tasks.tasks.save_payinfo": {"queue": APP_QUEUE_MAP["pay_approve_queue"]},
+celery_app.conf.task_routes = {
+    "app.tasks.tasks.save_payinfo": {"queue": "default"},
     # "app.tasks.analyze_job.analyze_incident_status_task": {"queue": "cron_tasks"},
 }
 

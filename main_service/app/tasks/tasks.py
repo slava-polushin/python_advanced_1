@@ -1,9 +1,13 @@
 import json
 import httpx
 
+from sqlalchemy.orm import Session
+
+
 # from pydantic import BaseModel
 
-from app.tasks.celery_config import app
+from app.tasks.celery_config import celery_app
+from app.database import get_db
 
 
 from app.config import COORDINATES_SERVICE_URL
@@ -12,8 +16,7 @@ from app.redis_client import redis_client_coordinates, redis_client_price
 
 from app.rabbitmq_client import APP_QUEUE_MAP, rabbitmq_client
 
-from app.schemas import CoordinatesBase
-
+from app.schemas import *
 
 def get_coordinates_via_str(address: str):
     address_key = f"address:{address}"
@@ -58,10 +61,54 @@ def get_price_via_coordinates(coordinates: CoordinatesBase):
     return price
 
 
-@app.task(serializer='json')
-def save_payinfo(message):
+# Обработка уведомления о корректной оплате заказа
+def pay_order_in_db(db: Session, order_id: int, sum_to_pay: float) -> OrderStatus:
+    print(f"### order_id={order_id}, sum_to_pay={sum_to_pay}")
+    pass
 
-    # Add your code here
+    return None
 
-    print(f"Task is Recieved: {message} from the backend")
-    return
+# Было проведено несколько разных попыток интеграции двух сервисов через CELERY,
+# Но ни один из нх не сработал
+
+# 1.
+# @celery_app.task()
+# Изначально было сделано так, и во внешнем сервисе попытка вызова - такая:
+            # app = Celery(
+            #     "tasks",
+            #     broker_url=CELERY_BROKER_URL
+            # )
+            # app.send_task(
+            #     name='app.tasks.tasks.save_payinfo',
+            #     args=(pay_sum, order_status) 
+            # )
+# С одной стороны это не падало, но и ничего не происходило.
+
+
+# 2.
+# С таким вариантом объявления точки обработки - падает при старте сервиса
+# Судя по всему shared_task может выступать как отдельный декоратор, но подойдет ли он, непонятно; пробовал методом "наугад"
+# from celery import shared_task
+# @shared_task(name='save_payinfo_queue',bind=True,)
+
+
+# 3.
+# Вариант предыдущего случая, с адресом 'app.tasks.tasks.save_payinfo'
+
+# from celery import shared_task
+# @shared_task()
+
+#4.
+# Пока что оставлен первоначальный вариант
+@celery_app.task()
+def save_payinfo(order_id: int, sum_to_pay: float):
+
+    print(f"PAY APPROVE is Recieved: order_id={order_id}, sum_to_pay={sum_to_pay}")
+
+    db = next(get_db())
+    try:
+        pay_order_in_db(db, order_id, sum_to_pay)
+    finally:
+        db.close()
+    return order_id
+    
