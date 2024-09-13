@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 YaBrowser/24.6.0.0 Safari/537.36" version="24.7.7">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 YaBrowser/24.7.0.0 Safari/537.36" version="24.7.12">
   <diagram name="Страница — 1" id="QKdwFJGbec12Yq18jWQP">
     <mxGraphModel dx="1434" dy="767" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -6,9 +6,6 @@
         <mxCell id="1" parent="0" />
         <mxCell id="_c2TWT5I3QaSmEufXdTA-1" value="Main service" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
           <mxGeometry x="228" y="348" width="80" height="80" as="geometry" />
-        </mxCell>
-        <mxCell id="_c2TWT5I3QaSmEufXdTA-2" value="Car service" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
-          <mxGeometry x="506" y="348" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="_c2TWT5I3QaSmEufXdTA-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="_c2TWT5I3QaSmEufXdTA-3" target="_c2TWT5I3QaSmEufXdTA-1" edge="1">
           <mxGeometry relative="1" as="geometry">
@@ -25,12 +22,12 @@
           <mxGeometry x="228" y="46" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="_c2TWT5I3QaSmEufXdTA-9" value="Driver" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
-          <mxGeometry x="766" y="358" width="30" height="60" as="geometry" />
+          <mxGeometry x="550" y="358" width="30" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="_c2TWT5I3QaSmEufXdTA-10" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="_c2TWT5I3QaSmEufXdTA-9" target="_c2TWT5I3QaSmEufXdTA-2" edge="1">
+        <mxCell id="_c2TWT5I3QaSmEufXdTA-10" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="_c2TWT5I3QaSmEufXdTA-9" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="286" y="408" as="sourcePoint" />
-            <mxPoint x="336" y="358" as="targetPoint" />
+            <mxPoint x="8" y="408" as="sourcePoint" />
+            <mxPoint x="308" y="388" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="_c2TWT5I3QaSmEufXdTA-19" value="1. Create an order&lt;div&gt;2. Get status of the order&lt;/div&gt;&lt;div&gt;3. Cancel order&lt;/div&gt;&lt;div&gt;4. Pay the order&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
@@ -71,8 +68,8 @@
         <mxCell id="_c2TWT5I3QaSmEufXdTA-25" value="redis" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
           <mxGeometry x="198" y="278" width="40" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="_c2TWT5I3QaSmEufXdTA-26" value="9. Here is my location&lt;div&gt;10. Show all orders around me&lt;/div&gt;&lt;div&gt;11. Choose an order&lt;/div&gt;&lt;div&gt;12. Cancel the choosen order&lt;/div&gt;&lt;div&gt;13. Get actual orders info&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="596" y="306" width="190" height="90" as="geometry" />
+        <mxCell id="_c2TWT5I3QaSmEufXdTA-26" value="9. Here is my location&lt;div&gt;10. Show all unassigned orders around me&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;11. Choose an order (execution request)&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;12. Cancel the choosen order&lt;/div&gt;&lt;div&gt;13. Completed the choosen order&lt;/div&gt;&lt;div&gt;14. Get actual orders info&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="330" y="288" width="250" height="100" as="geometry" />
         </mxCell>
         <mxCell id="_c2TWT5I3QaSmEufXdTA-27" value="5" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="213" y="246" width="30" height="30" as="geometry" />
@@ -83,28 +80,6 @@
         <mxCell id="_c2TWT5I3QaSmEufXdTA-29" value="7" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="272" y="286" width="30" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="_c2TWT5I3QaSmEufXdTA-31" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="308" y="358" as="sourcePoint" />
-            <mxPoint x="506" y="358" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="Fme6BXQ_-_RVlwOXnvyf-6" value="&lt;span style=&quot;font-size: 12px; text-align: left; background-color: rgb(251, 251, 251);&quot;&gt;14. Orders info (created/cancelled)&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="_c2TWT5I3QaSmEufXdTA-31">
-          <mxGeometry x="0.0505" y="3" relative="1" as="geometry">
-            <mxPoint x="-12" y="-7" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="_c2TWT5I3QaSmEufXdTA-33" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" parent="1" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="506" y="403" as="sourcePoint" />
-            <mxPoint x="308" y="403" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="Fme6BXQ_-_RVlwOXnvyf-4" value="&lt;span style=&quot;font-size: 12px; text-align: left; background-color: rgb(251, 251, 251);&quot;&gt;16. Trip info (started/ended/cancelled)&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="_c2TWT5I3QaSmEufXdTA-33">
-          <mxGeometry x="-0.1818" y="1" relative="1" as="geometry">
-            <mxPoint x="-15" y="-14" as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="_c2TWT5I3QaSmEufXdTA-35" value="DB Postgres" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
           <mxGeometry x="238" y="448" width="60" height="80" as="geometry" />
         </mxCell>
@@ -114,7 +89,7 @@
             <mxPoint x="298" y="358" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="_c2TWT5I3QaSmEufXdTA-37" value="18" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+        <mxCell id="_c2TWT5I3QaSmEufXdTA-37" value="15" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="238" y="428" width="40" height="30" as="geometry" />
         </mxCell>
         <mxCell id="_c2TWT5I3QaSmEufXdTA-38" value="cron job" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
@@ -126,11 +101,6 @@
             <mxPoint x="368" y="487.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Fme6BXQ_-_RVlwOXnvyf-9" value="&lt;span style=&quot;font-size: 12px; background-color: rgb(251, 251, 251);&quot;&gt;schedule&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="_c2TWT5I3QaSmEufXdTA-39">
-          <mxGeometry x="-0.2" y="2" relative="1" as="geometry">
-            <mxPoint x="2" y="-16" as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="_c2TWT5I3QaSmEufXdTA-41" value="S3" style="shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="476" y="438" width="82" height="90" as="geometry" />
         </mxCell>
@@ -140,30 +110,14 @@
             <mxPoint x="483" y="484" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="2" value="1. HTTP запрос создания заявки на поездку&lt;br&gt;2. HTTP запрос получения информации о ранее созданной заявке&lt;br&gt;3. HTTP запрос отмены заявки&lt;br&gt;4. HTTP запрос оплаты заявки&lt;br&gt;5. HTTP запрос получения координат по адресам заявки (в тестовом прототипе генерируется случайным образом)&lt;br&gt;6. HTTP запрос цены поездки&lt;br&gt;7. Сообщение об оплате поездки (RabbitMQ Direct exchange)&lt;br&gt;8. Уведомление о результате оплаты поездки (RabbitMQ Direct&amp;nbsp;Exchange)&lt;br&gt;9. HTTP Запрос генерируемый UI по уточнению текущих координат автомобиля&lt;br&gt;10. HTTP запрос получения списка заказов неподалеку от автомобиля&lt;br&gt;11. HTTP запрос назначения автомобиля заказу&lt;br&gt;12. HTTP запрос отмены назначения автомобиля заказу&lt;div&gt;13.&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;HTTP запрос получения статуса актуальных заказов&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;14. Уведомление об изменении статуса поездки: появление/отмена (RabbitMQ Fanout Exchange)&lt;br&gt;15. Уведомление о заявке на выполнение заказа&amp;nbsp;&lt;span style=&quot;background-color: initial;&quot;&gt;(RabbitMQ Fanout Exchange)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;16. Уведомление о выполнении поездки&amp;nbsp;либо отмены водителем ранее созданного назначения поездки (RabbitMQ Direct exchange)&lt;br&gt;17. Информация о местоположении автомобилей&amp;nbsp;&amp;nbsp;(RabbitMQ Direct exchange)&lt;br&gt;18. Запись информации о заказах и их обработке в БД&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry y="528" width="760" height="270" as="geometry" />
+        <mxCell id="2" value="1. HTTP запрос создания заявки на поездку&lt;br&gt;2. HTTP запрос получения информации о ранее созданной заявке&lt;br&gt;3. HTTP запрос отмены заявки&lt;br&gt;4. HTTP запрос оплаты заявки&lt;br&gt;5. HTTP запрос получения координат по адресам заявки (в тестовом прототипе генерируется случайным образом)&lt;br&gt;6. HTTP запрос цены поездки&lt;br&gt;7. Сообщение об оплате поездки (RabbitMQ Direct exchange)&lt;br&gt;8. HTTP запрос: уведомление о результате оплаты поездки (подтверждение оплаты)&lt;br&gt;9. HTTP Запрос генерируемый UI по уточнению текущих координат автомобиля&lt;br&gt;10. HTTP запрос получения списка неназначенных заказов неподалеку от автомобиля (в тестовой версии будут отображаться все заказы)&lt;br&gt;&lt;div&gt;11. HTTP запрос назначения автомобиля заказу (запрос на выполнение заказа)&lt;br&gt;12. HTTP запрос отмены назначения автомобиля заказу&lt;/div&gt;&lt;div&gt;13. HTTP запрос уведомления о завершении заказа&lt;br&gt;&lt;div&gt;14.&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;HTTP запрос получения статуса моих актуальных заказов&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;15. Запись сводной информации о заказах и их обработке в БД&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry y="548" width="800" height="230" as="geometry" />
         </mxCell>
-        <mxCell id="3" value="" style="endArrow=classic;html=1;entryX=1;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" parent="1" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="506" y="426" as="sourcePoint" />
-            <mxPoint x="308" y="426" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="M6Vq014UTE-fBTK37jgV-3" value="redis" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="238" y="246" width="40" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="Fme6BXQ_-_RVlwOXnvyf-5" value="&lt;span style=&quot;font-size: 12px; text-align: left; background-color: rgb(251, 251, 251);&quot;&gt;17. Cars locations info&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="3">
-          <mxGeometry x="-0.8283" y="-2" relative="1" as="geometry">
-            <mxPoint x="-96" y="-6" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="Fme6BXQ_-_RVlwOXnvyf-7" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="506" y="380" as="sourcePoint" />
-            <mxPoint x="308" y="380" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="Fme6BXQ_-_RVlwOXnvyf-8" value="&lt;span style=&quot;font-size: 12px; text-align: left; background-color: rgb(251, 251, 251);&quot;&gt;15. Request for order&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="Fme6BXQ_-_RVlwOXnvyf-7">
-          <mxGeometry x="-0.1818" y="1" relative="1" as="geometry">
-            <mxPoint x="-15" y="-14" as="offset" />
-          </mxGeometry>
+        <mxCell id="M6Vq014UTE-fBTK37jgV-5" value="schedule" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="302" y="458" width="70" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
