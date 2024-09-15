@@ -191,13 +191,6 @@ class CarStatus(Base):
         'Orders', back_populates='car_status')
 
 
-# orderStatusesSet = {'created',
-#                     'car_assigned',
-#                     'trip_started',
-#                     'trip_finished',
-#                     'cancelled'
-#                     }
-
 orderStatuses = frozendict({'created': 'created',
                             'car_assigned': 'car_assigned',
                             'trip_started': 'trip_started',

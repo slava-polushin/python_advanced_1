@@ -21,6 +21,7 @@ from app.schemas import (
     CarDriverAdd,
     OrderCreate,
     OrderStatusAdd,
+    CarStatusAdd,
     Client,
     Car,
     Driver,
@@ -30,6 +31,7 @@ from app.schemas import (
     Client,
     Car,
     Driver,
+    CarStatus,
 
     CoordinatesBase,
     PayInfo,
@@ -196,7 +198,7 @@ def create_order_in_db(db: Session, order: OrderCreate) -> Order:
 
 # Состояние заказа
 
-def get_orderstatus(db: Session, order_id: int) -> OrderStatus:
+def get_orderstatus_in_db(db: Session, order_id: int) -> OrderStatus:
     # Поиск последнего состояния для заказа
     db_orderstatus = db.query(OrderStatusModel).filter(
         OrderStatusModel.order_id == order_id).order_by(desc(OrderStatusModel.id)).first()
@@ -228,24 +230,45 @@ def pay_order_via_queue(pay_info: PayInfo, orderstatus: OrderStatus) -> PayInfo:
 
     print('### PAYING MESSAGE SENT!!!')
 
-
-    from app.config import RABBITMQ_URL, CELERY_BROKER_URL
-
-    from celery.app import Celery
-
-
-    app = Celery(
-        "tasks",
-        broker_url=CELERY_BROKER_URL
-    )
-    app.send_task(
-        name='app.tasks.tasks.save_payinfo',
-        args=(1234, 1) 
-    )
-
     return pay_info
 
-# # Обработка уведомления о корректной оплате заказа
-# def pay_order_in_db(db: Session, order_id: int, sum_to_pay: float) -> OrderStatus:
-#     pass
 
+def get_all_unassigned_orders_in_db(db: Session) -> list[Order]:
+    subquery = db.query(OrderStatusModel).subquery()
+
+    subquery = db.query(
+        subquery,
+        func.dense_rank().over(
+            order_by=subquery.c.id.desc(),
+            partition_by=subquery.c.order_id
+        ).label('rnk')
+    ).subquery()
+
+    subquery = db.query(subquery).filter(
+        subquery.c.rnk == 1,
+        subquery.c.status == 'created'
+    ).subquery()
+    
+    db_unassigned_orders = db.query(OrderModel).join(subquery,OrderModel.order_id==subquery.c.order_id
+    ).all()
+
+    return [Order.model_validate(order.__dict__) for order in db_unassigned_orders]
+
+
+# Процедуры для обработки таблицы car_status
+
+def get_carstatus_in_db(db: Session, car_id: int) -> CarStatus:
+    # Поиск последнего состояния для заказа
+    db_carstatus = db.query(CarStatusModel).filter(
+        CarStatusModel.car_id == car_id).order_by(desc(CarStatusModel.id)).first()
+
+    return CarStatus.model_validate(db_carstatus)
+
+
+def add_new_carstatus_in_db(db: Session, new_carstatus: CarStatusAdd) -> CarStatus:
+    db_car_status = CarStatusModel(**new_carstatus.model_dump())
+    db.add(db_car_status)
+    db.commit()
+    db.refresh(db_car_status)
+
+    return CarStatus.model_validate(db_car_status)

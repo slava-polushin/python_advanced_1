@@ -4,19 +4,15 @@ import httpx
 from sqlalchemy.orm import Session
 
 
-# from pydantic import BaseModel
-
-from app.tasks.celery_config import celery_app
 from app.database import get_db
 
 
-from app.config import COORDINATES_SERVICE_URL
-from app.config import PRICE_SERVICE_URL
+from app.config import COORDINATES_SERVICE_URL, PRICE_SERVICE_URL, DEBUG_MODE
 from app.redis_client import redis_client_coordinates, redis_client_price
 
 from app.rabbitmq_client import APP_QUEUE_MAP, rabbitmq_client
 
-from app.schemas import *
+from app.schemas import CoordinatesBase
 
 def get_coordinates_via_str(address: str):
     address_key = f"address:{address}"
@@ -61,15 +57,9 @@ def get_price_via_coordinates(coordinates: CoordinatesBase):
     return price
 
 
-# Обработка уведомления о корректной оплате заказа
-def pay_order_in_db(db: Session, order_id: int, sum_to_pay: float) -> OrderStatus:
-    print(f"### order_id={order_id}, sum_to_pay={sum_to_pay}")
-    pass
-
-    return None
 
 # Было проведено несколько разных попыток интеграции двух сервисов через CELERY,
-# Но ни один из нх не сработал
+# Но ни один из нх не сработал. Код оставлен для будущих экспериментов
 
 # 1.
 # @celery_app.task()
@@ -94,21 +84,7 @@ def pay_order_in_db(db: Session, order_id: int, sum_to_pay: float) -> OrderStatu
 
 # 3.
 # Вариант предыдущего случая, с адресом 'app.tasks.tasks.save_payinfo'
-
 # from celery import shared_task
 # @shared_task()
 
-#4.
-# Пока что оставлен первоначальный вариант
-@celery_app.task()
-def save_payinfo(order_id: int, sum_to_pay: float):
-
-    print(f"PAY APPROVE is Recieved: order_id={order_id}, sum_to_pay={sum_to_pay}")
-
-    db = next(get_db())
-    try:
-        pay_order_in_db(db, order_id, sum_to_pay)
-    finally:
-        db.close()
-    return order_id
     

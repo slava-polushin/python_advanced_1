@@ -7,7 +7,7 @@ from aio_pika  import ExchangeType
 
 import json
 
-from app.config import RABBITMQ_URL, CELERY_BROKER_URL
+from app.config import RABBITMQ_URL, CELERY_BROKER_URL, MAIN_SERVICE_URL
 from app.rabbitmq_client import APP_QUEUE_MAP, EXCHANGE_NAME
 
 from celery.app import Celery
@@ -21,44 +21,22 @@ async def process_pay_message(
         data = json.loads(body)
         order_status = data['order_status']
         pay_sum = data['pay_sum']
-        # Process the data here
+
         print(f"Received message: {order_status}")
         print(f"Received pay_sum: {pay_sum}")        
         
-        #TODO: Реализовать вервис оплаты, в текущей (тестовой) реализации считается что оплата проведена
+        #TODO: Реализовать сервис оплаты, в текущей (тестовой) реализации считается что оплата проведена
 
-        # producer_queue_name = APP_QUEUE_MAP["pay_approve_queue"]
-        # producer_queue = await channel.declare_queue(producer_queue_name, durable=True)
-
-        if pay_sum:
-
-            app = Celery(
-                "tasks",
-                broker_url=CELERY_BROKER_URL
-            )
-            app.send_task(
-                name='app.tasks.tasks.save_payinfo',
-                args=(pay_sum, order_status) 
-            )
-
-#TIDO: Удалить после экспериментов. Временно оставлена отключенная реализация очередей
-            # # ,
-            # args= отправляем ответ в exchange с ключом "pay_approve_queue
-            #"
-            # exch = await channel.declare_exchange(
-            #     name=EXCHANGE_NAME,
-            #     type=ExchangeType.DIRECT,
-            #     durable=True 
-            # )
-
-            # out_message = {"order_status": order_status, "accepted_sum": pay_sum}
-
-            # message_body = json.dumps(out_message, sort_keys=True, indent=4, default=str).encode("utf-8")
-
-            # await exch.publish(
-            #     message=aio_pika.Message(body=message_body),
-            #     routing_key=producer_queue_name
-            # )
+        if pay_sum: 
+            import requests
+            
+            new_paying = {
+                "order_id": order_status['order_id'],
+                "pay_sum": pay_sum,
+            }
+            response = requests.post(f"{MAIN_SERVICE_URL}/pay_accepted", json=new_paying)
+            
+            print(f"Pay acceptation request processed: {response.json()}")
 
 async def main():
     connection = await aio_pika.connect_robust(RABBITMQ_URL)

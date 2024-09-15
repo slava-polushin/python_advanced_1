@@ -87,6 +87,7 @@ class CarDriver(CarDriverBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 # Схемы таблиц 'orders', 'order_status'
 
 
@@ -106,7 +107,7 @@ class OrderCreate(OrderBase):
 
 class Order(OrderBase):
     order_id: int
-    client: Client
+    # client: Client 
     start_latitude: float
     start_longitude: float
     finish_latitude: float
@@ -133,11 +134,33 @@ class OrderStatusBase(BaseModel):
 class OrderStatusAdd(OrderStatusBase):
     pass
 
-
 class OrderStatus(OrderStatusBase):
     id: int
     car: Car | None = None
     order: Order
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# Схема таблицы 'car_status'
+class CarStatusBase(BaseModel):
+    car_id: int
+    #Статус автомобиля, может быть равен: {free, busy, broken, driver_missing}
+    status: str = "free"
+    current_latitude: float | None = None
+    current_longitude: float | None = None
+    order_id: int | None = None
+    comment: str | None = None
+
+class CarStatusAdd(CarStatusBase):
+    pass
+
+
+class CarStatus(CarStatusBase):
+    id: int
+    created_at: datetime | None = None
+    car: Car
+    order: Order | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

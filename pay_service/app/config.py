@@ -11,3 +11,7 @@ RABBITMQ_URL = os.getenv(
 CELERY_BROKER_URL = os.getenv(
     "CELERY_BROKER_URL", "redis://localhost:6379/0"
 )
+
+MAIN_SERVICE_URL = os.getenv(
+    "MAIN_SERVICE_URL", "http://main:8000/mainservice_api/v1"
+)

@@ -17,12 +17,7 @@ class CoordinatesPairRequest(BaseModel):
     finish_longitude: float
 
 
-# class CoordinatesResponse(BaseModel):
-#     latitude: float
-#     longitude: float
-
-
-# @router.post("/get-price", response_model=CoordinatesResponse)
+# Запрос №6 в схеме "Architecture.drawio" : POST localhost:8001/price_api/v1/get-price/
 @router.post("/get-price", response_model=float)
 def get_price(request: CoordinatesPairRequest):
     # TODO: для тестового использования, принимается сферическая модель Земли
