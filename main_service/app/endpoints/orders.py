@@ -1,9 +1,16 @@
 
 from fastapi import APIRouter, HTTPException, Body, Depends
 from sqlalchemy.orm import Session
-from app.crud import create_order_in_db, get_orderstatus_in_db, add_new_orderstatus_in_db, pay_order_via_queue, get_all_unassigned_orders_in_db
+from datetime import datetime
 
-from app.schemas import Order, OrderCreate, OrderStatus, OrderStatusAdd, PayInfo, orderStatuses
+from app.crud import create_order_in_db, pay_order_via_queue, get_all_unassigned_orders_in_db, get_orders_assigned_for_car_in_db
+from app.crud import get_orderstatus_in_db, add_new_orderstatus_in_db
+from app.crud import get_carstatus_in_db, add_new_carstatus_in_db
+from app.crud import assign_car_to_order_in_db, change_proceeding_order_for_car_status_in_db
+
+from app.schemas import Order, OrderCreate, OrderStatus, OrderStatusAdd, PayInfo
+from app.schemas import orderStatuses, carStatuses
+
 from app.database import get_db
 
 from app.config import DEBUG_MODE
@@ -37,9 +44,15 @@ def cancel_order(order_id: int = Body(..., embed=True), db: Session = Depends(ge
 
     new_orderstatus = OrderStatusAdd(**orderstatus.model_dump())
     new_orderstatus.status = orderStatuses['cancelled']
+    new_orderstatus.car_id = None
 
     orderstatus = add_new_orderstatus_in_db(
         db=db, new_orderstatus=new_orderstatus)
+    
+    db_car_status = get_carstatus_in_db(db=db, car_id=orderstatus.car_id)
+    db_car_status.status = carStatuses['free']
+    add_new_carstatus_in_db(db=db, new_carstatus=db_car_status)
+
     return orderstatus
 
 
@@ -95,3 +108,103 @@ def pay_acceptation(
 @router.get("/unassigned_orders/", response_model=list[Order])
 async def get_all_unassigned_orders(db: Session = Depends(get_db)):
     return get_all_unassigned_orders_in_db(db)
+
+
+# Запрос №11 в схеме "Architecture.drawio" : POST http://localhost:8000/mainservice_api/v1/assign_car_to_order
+@router.post("/assign_car_to_order/", response_model=OrderStatus)
+def assign_car_to_order(
+    order_id: int = Body(..., embed=True), 
+    car_id: int = Body(..., embed=True), 
+    comment: str = Body(default=None, embed=True), 
+    db: Session = Depends(get_db)
+): 
+    order_status = get_orderstatus_in_db(db,order_id)
+
+    # TODO Добавить проверку нештатных ситуаций
+    if order_status == None:
+        pass
+    elif order_status.status in (orderStatuses["trip_started"], orderStatuses["created"]):
+        pass
+
+    new_orderstatus = OrderStatusAdd(**order_status.model_dump())
+    new_orderstatus.car_id = car_id
+    new_orderstatus.status = orderStatuses["trip_started"]
+    new_orderstatus.comment = comment
+    new_orderstatus.start_at = datetime.now()
+
+    db_orderstatus = add_new_orderstatus_in_db(db, new_orderstatus=new_orderstatus) 
+
+    db_car_status = assign_car_to_order_in_db(db=db, order_id=order_id, car_id=car_id)
+
+    return OrderStatus(**db_orderstatus.model_dump())
+
+
+# Запрос №12 в схеме "Architecture.drawio" : POST http://localhost:8000/mainservice_api/v1/cancel_car_assign_to_order
+@router.post("/cancel_car_assign_to_order/", response_model=OrderStatus)
+def cancel_car_assign_to_order(
+    order_id: int = Body(..., embed=True), 
+    comment: str = Body(default=None, embed=True), 
+    db: Session = Depends(get_db)
+): 
+    order_status = get_orderstatus_in_db(db,order_id)
+
+    # TODO Добавить проверку нештатных ситуаций
+    if order_status == None:
+        pass
+    elif order_status.status not in (orderStatuses["car_assigned"], orderStatuses["trip_started"]):
+        pass
+
+    db_car_status = change_proceeding_order_for_car_status_in_db(
+        db=db, order_id=order_id, car_id=order_status.car_id
+    )
+
+    new_orderstatus = OrderStatusAdd(**order_status.model_dump())
+    new_orderstatus.car_id = None
+    new_orderstatus.status = orderStatuses["cancelled"]
+    new_orderstatus.comment = comment
+    new_orderstatus.finish_at = datetime.now()
+    # TODO: В тестовой системе, нет проверок на случай полной или частичной оплатой перед отменой заказа
+    new_orderstatus.unpaid_rest = None 
+
+    db_orderstatus = add_new_orderstatus_in_db(db, new_orderstatus=new_orderstatus) 
+
+    return OrderStatus(**db_orderstatus.model_dump())
+
+
+# Запрос №13 в схеме "Architecture.drawio" : POST http://localhost:8000/mainservice_api/v1/complete_order
+@router.post("/complete_order/", response_model=OrderStatus)
+def complete_order(
+    order_id: int = Body(..., embed=True), 
+    comment: str = Body(default=None, embed=True), 
+    db: Session = Depends(get_db)
+): 
+    order_status = get_orderstatus_in_db(db,order_id)
+
+    # TODO Добавить проверку нештатных ситуаций
+    if order_status == None:
+        pass
+    elif order_status.status not in (orderStatuses["car_assigned"], orderStatuses["trip_started"]):
+        pass
+
+    db_car_status = change_proceeding_order_for_car_status_in_db(
+        db=db, order_id=order_id, car_id=order_status.car_id
+    )
+
+    new_orderstatus = OrderStatusAdd(**order_status.model_dump())
+    new_orderstatus.car_id = None
+    new_orderstatus.status = orderStatuses["trip_finished"]
+    new_orderstatus.comment = comment
+    new_orderstatus.finish_at = datetime.now()
+
+    db_orderstatus = add_new_orderstatus_in_db(db, new_orderstatus=new_orderstatus) 
+
+    return OrderStatus(**db_orderstatus.model_dump())
+
+
+# Запрос №14 в схеме "Architecture.drawio" : GET http://localhost:8000/mainservice_api/v1/orders_assigned_for_car
+@router.get("/orders_assigned_for_car/", response_model=list[Order])
+async def get_orders_assigned_for_car(
+    car_id: int = Body(..., embed=True), 
+    db: Session = Depends(get_db)
+):
+    return get_orders_assigned_for_car_in_db(db, car_id=car_id)

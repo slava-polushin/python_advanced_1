@@ -1,13 +1,12 @@
 ### Описание моделей данных для организации доступа по HTTP ###
 
+from frozendict import frozendict
+
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime, date
 
-from app.models import orderStatuses
 
 # Схема таблицы 'clients'
-
-
 class ClientBase(BaseModel):
     client_name: str
     comment: str | None = None
@@ -90,6 +89,12 @@ class CarDriver(CarDriverBase):
 
 # Схемы таблиц 'orders', 'order_status'
 
+orderStatuses = frozendict({'created': 'created',
+                            'car_assigned': 'car_assigned',
+                            'trip_started': 'trip_started',
+                            'trip_finished': 'trip_finished',
+                            'cancelled': 'cancelled'
+                            })
 
 class OrderBase(BaseModel):
     # client: Client
@@ -127,7 +132,7 @@ class OrderStatusBase(BaseModel):
     comment: str | None = None
     start_at: datetime | None = None
     finish_at: datetime | None = None
-    unpaid_rest: float
+    unpaid_rest: float | None = None # None для отмененных заказов
     created_at: datetime
 
 
@@ -143,10 +148,17 @@ class OrderStatus(OrderStatusBase):
 
 
 # Схема таблицы 'car_status'
+carStatuses = frozendict({
+    'free': 'free', # Ожидает заказ
+    'busy': 'busy', # Выполняет заказ
+    'broken': 'broken', # Неисправна
+    'driver_missing': 'driver_missing', # Отсутствует водитель
+})
+
 class CarStatusBase(BaseModel):
     car_id: int
     #Статус автомобиля, может быть равен: {free, busy, broken, driver_missing}
-    status: str = "free"
+    status: str = carStatuses['driver_missing']     
     current_latitude: float | None = None
     current_longitude: float | None = None
     order_id: int | None = None

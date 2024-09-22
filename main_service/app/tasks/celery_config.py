@@ -9,7 +9,7 @@ celery_app = Celery(
     "tasks",
     broker=CELERY_BROKER_URL,
     include=[
-        "app.tasks.tasks", 
+        "app.endpoints.orders", 
         # "app.tasks.analyze_job",
     ],
 )
@@ -22,7 +22,7 @@ celery_app.conf.task_queues = {
 
 # Configure task routes
 celery_app.conf.task_routes = {
-    "app.tasks.tasks.save_payinfo": {"queue": "default"},
+    "app.endpoints.orders.save_payinfo": {"queue": "default"},
     # "app.tasks.analyze_job.analyze_incident_status_task": {"queue": "cron_tasks"},
 }
 

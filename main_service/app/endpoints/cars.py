@@ -3,9 +3,11 @@
 
 from fastapi import APIRouter, HTTPException, Body, Depends
 from sqlalchemy.orm import Session
-from app.crud import get_car, create_car_in_db, get_carstatus_in_db, add_new_carstatus_in_db
-from app.schemas import Car, CarCreate, CarStatus, CarStatusAdd
+
+from app.crud import get_car, create_car_in_db, get_carstatus_in_db, add_new_carstatus_in_db 
 from app.database import get_db
+from app.schemas import Car, CarCreate, CarStatus, CarStatusAdd
+from app.schemas import carStatuses
 
 router = APIRouter()
 
@@ -14,7 +16,8 @@ def create_car(car: CarCreate, db: Session = Depends(get_db)):
     db_car = create_car_in_db(db=db, car=car)
 
     new_carstatus = CarStatusAdd(car_id=db_car.car_id)
-    add_new_carstatus_in_db(db=db, new_carstatus=new_carstatus)
+    new_carstatus.status = carStatuses["driver_missing"]
+    car = add_new_carstatus_in_db(db=db, new_carstatus=new_carstatus)
 
     return car
 
@@ -30,13 +33,16 @@ def read_car(car_id: int, db: Session = Depends(get_db)):
 # Запрос №9 в схеме "Architecture.drawio" : POST http://localhost:8000/mainservice_api/v1/set_car_coordinates
 @router.post("/set_car_coordinates/", response_model=CarStatus)
 def set_car_coordinates(car_status: CarStatusAdd, db: Session = Depends(get_db)):
+    
     current_car_status = get_carstatus_in_db(db=db, car_id=car_status.car_id)
+    if current_car_status == None:
+        new_carstatus = CarStatusAdd(**car_status.model_dump())
+        new_carstatus.car_id = car_status.car_id
+    else:
+        new_carstatus = CarStatusAdd(**current_car_status.model_dump())
 
-    new_carstatus = CarStatusAdd(**current_car_status.model_dump())
     new_carstatus.current_latitude = car_status.current_latitude
     new_carstatus.current_longitude = car_status.current_longitude
     
-    if current_car_status == None:
-        new_carstatus.car_id = car_status.car_id
 
     return add_new_carstatus_in_db(db=db, new_carstatus=new_carstatus)

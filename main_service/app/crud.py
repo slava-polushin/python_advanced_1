@@ -36,6 +36,8 @@ from app.schemas import (
     CoordinatesBase,
     PayInfo,
 )
+from app.schemas import orderStatuses
+from app.schemas import carStatuses
 
 from app.tasks.tasks import get_coordinates_via_str, get_price_via_coordinates
 
@@ -100,6 +102,25 @@ def create_cardriver_in_db(db: Session, cardriver: CarDriverAdd) -> CarDriver:
     if busy_driver_fl > 0:
         raise HTTPException(
             status_code=404, detail="Driver is assigned to other car. Please unassign first")
+
+    # Проверка состояния автомобиля (не сломан ли он), и естановка флага назначения водителя автомобилю
+    # Поиск последнего состояния для заказа
+    car_status = get_carstatus_in_db(db=db, car_id=cardriver.car_id)
+    if car_status == None:
+        car_status = CarStatusAdd(
+            car_id=cardriver.car_id
+        )
+    elif car_status.status in (carStatuses["broken"]):
+        raise HTTPException(
+            status_code=404, detail=f"Car is in status {car_status.status} and can't be assigned to driver")
+    else:
+        car_status.status = carStatuses["free"]
+
+    car_status = CarStatusAdd(**car_status.model_dump())
+
+    db_car_status = CarStatusModel(**car_status.model_dump())
+    db.add(db_car_status)
+
 
     # Поиск последнего назначенного водителя для автомобиля
     db_cardriver = db.query(CarDriverModel).filter(
@@ -246,13 +267,39 @@ def get_all_unassigned_orders_in_db(db: Session) -> list[Order]:
 
     subquery = db.query(subquery).filter(
         subquery.c.rnk == 1,
-        subquery.c.status == 'created'
+        subquery.c.status == orderStatuses["created"]
     ).subquery()
     
     db_unassigned_orders = db.query(OrderModel).join(subquery,OrderModel.order_id==subquery.c.order_id
     ).all()
 
     return [Order.model_validate(order.__dict__) for order in db_unassigned_orders]
+
+
+def get_orders_assigned_for_car_in_db(
+        db: Session,
+        car_id: int
+    ) -> list[Order]:
+    subquery = db.query(OrderStatusModel).subquery()
+
+    subquery = db.query(
+        subquery,
+        func.dense_rank().over(
+            order_by=subquery.c.id.desc(),
+            partition_by=subquery.c.order_id
+        ).label('rnk')
+    ).subquery()
+
+    subquery = db.query(subquery).filter(
+        subquery.c.rnk == 1,
+        subquery.c.car_id == car_id,
+        subquery.c.status == orderStatuses["trip_started"]
+    ).subquery()
+    
+    db_assigned_orders = db.query(OrderModel).join(subquery,OrderModel.order_id==subquery.c.order_id
+    ).all()
+
+    return [Order.model_validate(order.__dict__) for order in db_assigned_orders]
 
 
 # Процедуры для обработки таблицы car_status
@@ -262,11 +309,112 @@ def get_carstatus_in_db(db: Session, car_id: int) -> CarStatus:
     db_carstatus = db.query(CarStatusModel).filter(
         CarStatusModel.car_id == car_id).order_by(desc(CarStatusModel.id)).first()
 
+    if db_carstatus == None:
+        return None
+    
     return CarStatus.model_validate(db_carstatus)
 
 
 def add_new_carstatus_in_db(db: Session, new_carstatus: CarStatusAdd) -> CarStatus:
     db_car_status = CarStatusModel(**new_carstatus.model_dump())
+    db.add(db_car_status)
+    db.commit()
+    db.refresh(db_car_status)
+
+    return CarStatus.model_validate(db_car_status)
+
+
+def assign_car_to_order_in_db(db:Session, order_id: int, car_id: int) -> CarStatus:
+    #Проверка, не назначен ли на заказ другой автомобиль
+    subquery = db.query(OrderStatusModel).subquery()
+
+    subquery = db.query(
+        subquery,
+        func.dense_rank().over(
+            order_by=(subquery.c.created_at.desc(),subquery.c.id.desc()),
+            partition_by=subquery.c.order_id
+        ).label('rnk')
+    ).subquery()
+
+    order_already_assigned_fl = db.query(subquery).filter(
+        subquery.c.rnk == 1,
+        subquery.c.order_id == order_id,
+        subquery.c.car_id != car_id
+    ).count()
+
+    if order_already_assigned_fl > 0:
+        raise HTTPException(
+            status_code=404, detail=f"Order {order_id} is assigned to other car. Please unassign first")
+
+    # Поиск последнего состояния для заказа
+    car_status = get_carstatus_in_db(db=db, car_id=car_id)
+
+    # Назначение автомобиля на заказ
+    if car_status == None:
+        car_status = CarStatusAdd(
+            car_id=car_id, 
+            order_id=order_id
+        )
+    elif car_status.status in (carStatuses["broken"], carStatuses["driver_missing"]):
+        raise HTTPException(
+            status_code=404, detail=f"Car is in status {db_car_status.status} and can't be assigned to order")
+    else:
+        car_status.status = carStatuses["busy"]
+        car_status.order_id = order_id
+
+    car_status = CarStatusAdd(**car_status.model_dump())
+    db_car_status = CarStatusModel(**car_status.model_dump())
+
+    db.add(db_car_status)
+    db.commit()
+    db.refresh(db_car_status)
+
+    return CarStatus.model_validate(db_car_status)
+
+
+def change_proceeding_order_for_car_status_in_db(
+        db:Session, 
+        order_id: int, 
+        car_id: int
+    ) -> CarStatus:
+    #Проверка, не назначен ли на заказ другой автомобиль
+    subquery = db.query(OrderStatusModel).subquery()
+
+    subquery = db.query(
+        subquery,
+        func.dense_rank().over(
+            order_by=(subquery.c.created_at.desc(),subquery.c.id.desc()),
+            partition_by=subquery.c.order_id
+        ).label('rnk')
+    ).subquery()
+
+    order_already_assigned_fl = db.query(subquery).filter(
+        subquery.c.rnk == 1,
+        subquery.c.order_id == order_id,
+        subquery.c.car_id == car_id
+    ).count()
+
+    if order_already_assigned_fl == 0:
+        raise HTTPException(
+            status_code=404, detail=f"Order {order_id} is not assigned to car {car_id}. Please assign first")
+
+    # Поиск последнего состояния для заказа
+    car_status = get_carstatus_in_db(db=db, car_id=car_id)
+
+    # Назначение автомобиля на заказ
+    if car_status == None:
+        raise HTTPException(
+            status_code=404, detail="Car statuses not exists, and can't be cancelled")
+    elif car_status.status not in (carStatuses["busy"]):
+        raise HTTPException(
+            status_code=404, detail=f"Car is in status {db_car_status.status} and can't be de-assigned (cancelled) for order {order_id}")
+    else:
+        car_status.status = carStatuses["free"]
+        car_status.order_id = None
+
+    car_status = CarStatusAdd(**car_status.model_dump())
+    db_car_status = CarStatusModel(**car_status.model_dump())
+
     db.add(db_car_status)
     db.commit()
     db.refresh(db_car_status)

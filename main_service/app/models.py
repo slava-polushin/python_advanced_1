@@ -5,7 +5,6 @@
 sqlacodegen_v2 postgresql://app:mypassword@localhost:5432/taxi
 """
 
-from frozendict import frozendict
 from typing import List, Optional
 
 from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKeyConstraint, Index, Numeric, PrimaryKeyConstraint, UniqueConstraint, String, Text, text
@@ -189,14 +188,6 @@ class CarStatus(Base):
     car: Mapped['Cars'] = relationship('Cars', back_populates='car_status')
     order: Mapped[Optional['Orders']] = relationship(
         'Orders', back_populates='car_status')
-
-
-orderStatuses = frozendict({'created': 'created',
-                            'car_assigned': 'car_assigned',
-                            'trip_started': 'trip_started',
-                            'trip_finished': 'trip_finished',
-                            'cancelled': 'cancelled'
-                            })
 
 
 class OrderStatus(Base):
