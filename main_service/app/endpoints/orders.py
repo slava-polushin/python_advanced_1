@@ -6,7 +6,7 @@ from datetime import datetime
 from app.crud import create_order_in_db, pay_order_via_queue, get_all_assigned_or_not_orders_in_db
 from app.crud import get_orderstatus_in_db, add_new_orderstatus_in_db, save_payinfo
 from app.crud import get_carstatus_in_db, add_new_carstatus_in_db
-from app.crud import check_car_assigning_fl, assign_car_to_order_in_db, change_proceeding_order_for_car_status_in_db
+from app.crud import check_car_assigning_flag, assign_car_to_order_in_db, change_proceeding_order_for_car_status_in_db
 
 from app.schemas import Order, OrderCreate, OrderStatus, OrderStatusAdd, PayInfo
 from app.schemas import orderStatuses, carStatuses
@@ -103,7 +103,7 @@ def assign_car_to_order(
     db: Session = Depends(get_db)
 ): 
     #Проверка, назначен ли на заказ другой автомобиль    
-    order_already_assigned_fl = check_car_assigning_fl(db=db, order_id=order_id, car_id_exclude=car_id)
+    order_already_assigned_fl = check_car_assigning_flag(db=db, order_id=order_id, car_id_exclude=car_id)
     if order_already_assigned_fl:
         raise HTTPException(
             status_code=404, detail=f"Order {order_id} is assigned to other car. Please unassign first")
@@ -149,7 +149,7 @@ def cancel_car_assign_to_order(
             status_code=404, detail=f"Order in status {order_status.status} and cant'be cancelled")
 
     #Проверка, назначен ли на заказ этот же самый автомобиль    
-    order_already_assigned_fl = check_car_assigning_fl(db=db, order_id=order_id, car_id_include=order_status.car_id)
+    order_already_assigned_fl = check_car_assigning_flag(db=db, order_id=order_id, car_id_include=order_status.car_id)
     if not order_already_assigned_fl:
         raise HTTPException(
             status_code=404, detail=f"Order {order_id} is not assigned to car {order_status.car_id}. Please assign first")

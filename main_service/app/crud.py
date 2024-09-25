@@ -317,7 +317,7 @@ def add_new_carstatus_in_db(db: Session, new_carstatus: CarStatusAdd) -> CarStat
     return CarStatus.model_validate(db_car_status)
 
 #Проверка, назначен ли на заказ этот же самый (car_id_include) или другой (car_id_exclude) автомобиль
-def check_car_assigning_fl(
+def check_car_assigning_flag(
         db:Session, 
         order_id: int, 
         car_id_include: int = None, 
@@ -334,13 +334,13 @@ def check_car_assigning_fl(
     ).subquery()
 
     #Для повышения производительности созданы два разных подзапроса с ветвлением по if
-    if not (car_id_include is None) and car_id_exclude is None:
+    if car_id_include is not None and car_id_exclude is None:
         order_already_assigned_fl = db.query(subquery).filter(
             subquery.c.rnk == 1,
             subquery.c.order_id == order_id,
             subquery.c.car_id == car_id_include
         ).count()
-    elif not (car_id_exclude is None) and car_id_include is None:
+    elif car_id_exclude is not None and car_id_include is None:
         order_already_assigned_fl = db.query(subquery).filter(
             subquery.c.rnk == 1,
             subquery.c.order_id == order_id,
