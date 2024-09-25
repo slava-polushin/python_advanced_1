@@ -35,7 +35,7 @@ def read_car(car_id: int, db: Session = Depends(get_db)):
 def set_car_coordinates(car_status: CarStatusAdd, db: Session = Depends(get_db)):
     
     current_car_status = get_carstatus_in_db(db=db, car_id=car_status.car_id)
-    if current_car_status == None:
+    if current_car_status is None:
         new_carstatus = CarStatusAdd(**car_status.model_dump())
         new_carstatus.car_id = car_status.car_id
     else:

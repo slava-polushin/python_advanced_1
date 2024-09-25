@@ -3,17 +3,15 @@ from fastapi import APIRouter, HTTPException, Body, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from app.crud import create_order_in_db, pay_order_via_queue, get_all_unassigned_orders_in_db, get_orders_assigned_for_car_in_db
-from app.crud import get_orderstatus_in_db, add_new_orderstatus_in_db
+from app.crud import create_order_in_db, pay_order_via_queue, get_all_assigned_or_not_orders_in_db
+from app.crud import get_orderstatus_in_db, add_new_orderstatus_in_db, save_payinfo
 from app.crud import get_carstatus_in_db, add_new_carstatus_in_db
-from app.crud import assign_car_to_order_in_db, change_proceeding_order_for_car_status_in_db
+from app.crud import check_car_assigning_fl, assign_car_to_order_in_db, change_proceeding_order_for_car_status_in_db
 
 from app.schemas import Order, OrderCreate, OrderStatus, OrderStatusAdd, PayInfo
 from app.schemas import orderStatuses, carStatuses
 
 from app.database import get_db
-
-from app.config import DEBUG_MODE
 
 router = APIRouter()
 
@@ -78,28 +76,14 @@ def pay_order(pay_info: PayInfo, db: Session = Depends(get_db)):
     return pay_info
 
 
-def save_payinfo(order_id: int, sum_to_pay: float) -> OrderStatus:
-    db = next(get_db())
-    try:
-        order_status = get_orderstatus_in_db(db,order_id)
-        new_orderstatus = OrderStatusAdd(**order_status.model_dump())
-        new_orderstatus.unpaid_rest -= sum_to_pay
-        if DEBUG_MODE:
-            print(f"PAY APPROVED: order_id={order_id}, sum_to_pay={sum_to_pay}, new unpaid rest={new_orderstatus.unpaid_rest}")
-
-        db_orderstatus = add_new_orderstatus_in_db(db, new_orderstatus=new_orderstatus) 
-    finally:
-        db.close()
-    return db_orderstatus
-
-
 # Запрос №8 в схеме "Architecture.drawio" : POST http://localhost:8000/mainservice_api/v1/pay_accepted
 @router.post("/pay_accepted/", response_model=OrderStatus)
 def pay_acceptation(
     order_id: int = Body(..., embed=True), 
-    pay_sum: float = Body(..., embed=True)
+    pay_sum: float = Body(..., embed=True), 
+    db: Session = Depends(get_db)
 ):
-    orderstatus = save_payinfo(order_id=order_id, sum_to_pay=pay_sum)
+    orderstatus = save_payinfo(order_id=order_id, sum_to_pay=pay_sum, db=db)
 
     return orderstatus
 
@@ -107,7 +91,7 @@ def pay_acceptation(
 # Запрос №10 в схеме "Architecture.drawio" : GET http://localhost:8000/mainservice_api/v1/unassigned_orders
 @router.get("/unassigned_orders/", response_model=list[Order])
 async def get_all_unassigned_orders(db: Session = Depends(get_db)):
-    return get_all_unassigned_orders_in_db(db)
+    return get_all_assigned_or_not_orders_in_db(db=db, car_id=None)
 
 
 # Запрос №11 в схеме "Architecture.drawio" : POST http://localhost:8000/mainservice_api/v1/assign_car_to_order
@@ -118,13 +102,21 @@ def assign_car_to_order(
     comment: str = Body(default=None, embed=True), 
     db: Session = Depends(get_db)
 ): 
+    #Проверка, назначен ли на заказ другой автомобиль    
+    order_already_assigned_fl = check_car_assigning_fl(db=db, order_id=order_id, car_id_exclude=car_id)
+    if order_already_assigned_fl:
+        raise HTTPException(
+            status_code=404, detail=f"Order {order_id} is assigned to other car. Please unassign first")
+
     order_status = get_orderstatus_in_db(db,order_id)
 
-    # TODO Добавить проверку нештатных ситуаций
-    if order_status == None:
-        pass
-    elif order_status.status in (orderStatuses["trip_started"], orderStatuses["created"]):
-        pass
+    # Проверка нештатных ситуаций
+    if order_status is None:
+        # Допустимое состояние, настоящая процедура создаст первую запись в таблице
+        order_status = OrderStatusAdd(order_id=order_id)        
+    elif order_status.status in (orderStatuses["trip_started"], orderStatuses["car_assigned"]):
+        raise HTTPException(
+            status_code=404, detail=f"Order already in status {order_status.status} and cant'be re-assigned")
 
     new_orderstatus = OrderStatusAdd(**order_status.model_dump())
     new_orderstatus.car_id = car_id
@@ -145,14 +137,22 @@ def cancel_car_assign_to_order(
     order_id: int = Body(..., embed=True), 
     comment: str = Body(default=None, embed=True), 
     db: Session = Depends(get_db)
-): 
+):    
     order_status = get_orderstatus_in_db(db,order_id)
 
-    # TODO Добавить проверку нештатных ситуаций
-    if order_status == None:
-        pass
+    # Проверка нештатных ситуаций
+    if order_status is None:
+        # Допустимое состояние, настоящая процедура создаст первую запись в таблице
+        order_status = OrderStatusAdd(order_id=order_id)        
     elif order_status.status not in (orderStatuses["car_assigned"], orderStatuses["trip_started"]):
-        pass
+        raise HTTPException(
+            status_code=404, detail=f"Order in status {order_status.status} and cant'be cancelled")
+
+    #Проверка, назначен ли на заказ этот же самый автомобиль    
+    order_already_assigned_fl = check_car_assigning_fl(db=db, order_id=order_id, car_id_include=order_status.car_id)
+    if not order_already_assigned_fl:
+        raise HTTPException(
+            status_code=404, detail=f"Order {order_id} is not assigned to car {order_status.car_id}. Please assign first")
 
     db_car_status = change_proceeding_order_for_car_status_in_db(
         db=db, order_id=order_id, car_id=order_status.car_id
@@ -180,11 +180,12 @@ def complete_order(
 ): 
     order_status = get_orderstatus_in_db(db,order_id)
 
-    # TODO Добавить проверку нештатных ситуаций
-    if order_status == None:
-        pass
+    # Проверка нештатных ситуаций
+    if order_status is None:
+        order_status = OrderStatusAdd(order_id=order_id)        
     elif order_status.status not in (orderStatuses["car_assigned"], orderStatuses["trip_started"]):
-        pass
+        raise HTTPException(
+            status_code=404, detail=f"Order in status {order_status.status} and cant'be completed")
 
     db_car_status = change_proceeding_order_for_car_status_in_db(
         db=db, order_id=order_id, car_id=order_status.car_id
@@ -207,4 +208,4 @@ async def get_orders_assigned_for_car(
     car_id: int = Body(..., embed=True), 
     db: Session = Depends(get_db)
 ):
-    return get_orders_assigned_for_car_in_db(db, car_id=car_id)
+    return get_all_assigned_or_not_orders_in_db(db, car_id=car_id)
