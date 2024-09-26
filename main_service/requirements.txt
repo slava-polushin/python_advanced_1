@@ -10,6 +10,7 @@ dnspython==2.6.1
 email_validator==2.2.0
 fastapi==0.111.1
 fastapi-cli==0.0.4
+frozendict==2.4.4
 gevent==24.2.1
 greenlet==3.0.3
 h11==0.14.0

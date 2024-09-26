@@ -20,3 +20,10 @@ PRICE_SERVICE_URL = os.getenv(
     "PRICE_SERVICE_URL", "http://localhost:8002/price_api/v1/get-price"
 )
 PRICE_REDIS_URL = os.getenv("PRICE_REDIS_URL", "redis://localhost:6379/2")
+
+RABBITMQ_URL = os.getenv(
+    "RABBITMQ_URL", "RABBITMQ_URL=amqp://user:password@localhost:5672/"
+)
+RABBITMQ_RECONNECT_PAUSE = 5
+RABBITMQ_RECONNECT_COUNT = 100
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")

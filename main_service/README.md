@@ -16,6 +16,11 @@ http://localhost:8001/docs
 Описание интерфейсов 'price_srv' можно получить по url:
 http://localhost:8002/docs
 
-
 Администрирование хранилища redis (redisinsight):
 http://127.0.0.1:5540/
+
+Администрирование rabbitMQ (user / password)
+http://127.0.0.1:15672/
+
+Администрирование celery (mher/flower):
+http://localhost:5555/

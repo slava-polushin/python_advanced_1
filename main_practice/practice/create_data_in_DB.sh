@@ -35,7 +35,13 @@ then
     curl -X POST -H "Content-Type: application/json" -d '{"car_id":4, "driver_id":4, "fromdate": "2020-01-01", "comment":"Первое назначение машины 4"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
     curl -X POST -H "Content-Type: application/json" -d '{"car_id":5, "driver_id":7, "fromdate": "2020-01-01", "comment":"Первое назначение машины 5"}' http://main:8000/mainservice_api/v1/cardrivers/ | tee -a "$LOG_FILE"
 
-# Создание заявки на поездку в такси
+# Создание заявки на поездку в такси (№1)
     curl -X POST -H "Content-Type: application/json" -d '{"client_id": 3, "start_address": "Киров, Азина 41", "finish_address": "Киров, Попова 62", "baby_chair_fl": false, "comment": "Первый заказ в службе такси", "status_comment": "Заказ размещён, ожидает назначения автомобиля"}'  http://main:8000/mainservice_api/v1/orders/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"client_id": 4, "start_address": "Киров, Октябрьский проспект 125", "finish_address": "Киров, Даниловский проезд 18", "baby_chair_fl": false, "comment": "Второй заказ в службе такси", "status_comment": "Заказ №2 размещён, ожидает назначения автомобиля"}'  http://main:8000/mainservice_api/v1/orders/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"client_id": 1, "start_address": "Киров, Некрасова 19", "finish_address": "Киров, Сурикова 10", "baby_chair_fl": true, "comment": "Третий заказ в службе такси", "status_comment": "Заказ №3 размещён, ожидает назначения автомобиля"}'  http://main:8000/mainservice_api/v1/orders/ | tee -a "$LOG_FILE"
+
+# Назначение автомобиля заказу (№11)
+    curl -X POST -H "Content-Type: application/json" -d '{"order_id": 1, "car_id": 1, "comment": "Первый заказ назначен автомобилю № 1"}'  http://main:8000/mainservice_api/v1/assign_car_to_order/ | tee -a "$LOG_FILE"
+    curl -X POST -H "Content-Type: application/json" -d '{"order_id": 2, "car_id": 3, "comment": "Второй заказ назначен автомобилю № 3"}'  http://main:8000/mainservice_api/v1/assign_car_to_order/ | tee -a "$LOG_FILE"
 
 fi

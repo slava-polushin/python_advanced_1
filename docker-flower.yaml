@@ -1,0 +1,11 @@
+# Дополнительное приложение для контроля работы celery, 
+# не является функциональной частью проекта и может быть отключено 
+# без последствий для работоспособности приложения
+services:
+  flower:
+    image: mher/flower
+    container_name: flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    ports:
+      - "5555:5555"

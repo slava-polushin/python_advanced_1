@@ -15,6 +15,7 @@ from app.config import DEBUG_MODE
 from app.config import MAINSERVICE_APP_PORT, COORDINATES_REDIS_URL, PRICE_REDIS_URL
 from app.redis_client import redis_client_coordinates
 from app.redis_client import redis_client_price
+from app.rabbitmq_client import rabbitmq_client
 
 
 
@@ -23,10 +24,12 @@ async def lifespan(app: FastAPI):
     # Startup event
     redis_client_coordinates.connect(urlStr=COORDINATES_REDIS_URL)
     redis_client_price.connect(urlStr=PRICE_REDIS_URL)
+    rabbitmq_client.connect()
     yield
     # Shutdown event
     redis_client_coordinates.close()
     redis_client_price.close()
+    rabbitmq_client.close()
 
 
 app = FastAPI(lifespan=lifespan, debug=DEBUG_MODE)

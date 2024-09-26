@@ -13,7 +13,7 @@ class CoordinatesResponse(BaseModel):
     latitude: float
     longitude: float
 
-
+# Запрос №5 в схеме "Architecture.drawio" : POST localhost:8001/coordinates_api/v1/get-coordinates/
 @router.post("/get-coordinates", response_model=CoordinatesResponse)
 def get_coordinates(request: AddressRequest):
     # TODO: в тестовой системе координаты генерируются случайным образом
