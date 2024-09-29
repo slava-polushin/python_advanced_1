@@ -1,4 +1,21 @@
 services:
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    environment:
+      - SERVICES=s3
+      - AWS_DEFAULT_REGION=eu-west-1
+    ports:
+      - "4566:4566"
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "/etc/localstack/init/ready.d/setup_localstack.sh"
+      ]
+    volumes:
+      - ./setup_localstack.sh:/etc/localstack/init/ready.d/setup_localstack.sh
+
   main:
     build:
       context: ./main_service
@@ -147,7 +164,7 @@ services:
       dockerfile: Dockerfile
     container_name: celery_worker
     environment:
-      - DATABASE_URL=postgresql://taxi:mypassword@db:5432/mydatabase
+      - DATABASE_URL=postgresql://app:mypassword@db:5432/taxi
       - COORDINATES_SERVICE_URL=http://coordinates:8001/coordinates_api/v1/get-coordinates
       - REDIS_URL=redis://redis:6379/1
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
@@ -168,6 +185,29 @@ services:
         "-Q",
         "default"
       ]
+    restart: unless-stopped
+
+  celery_job:
+    build:
+      context: ./main_service
+      dockerfile: Dockerfile
+    container_name: celery_job
+    environment:
+      - DATABASE_URL=postgresql://app:mypassword@db:5432/taxi
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - AWS_REGION=eu-west-1
+      - LOCALSTACK_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
+      - S3_BUCKET_NAME=bucket
+    depends_on:
+      db:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    command: >
+      sh -c "celery -A app.tasks.celery_config worker -Q cron_tasks --loglevel=info &
+             celery -A app.tasks.celery_config beat --loglevel=info"
     restart: unless-stopped
 
   # Дополнительная функциональность для отладки проекта

@@ -132,3 +132,5 @@ dmypy.json
 
 .vscode
 main_service/practice/taxi_practice.py
+
+s3_data/

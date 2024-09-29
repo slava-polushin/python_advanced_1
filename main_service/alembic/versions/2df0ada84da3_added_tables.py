@@ -1,8 +1,8 @@
 """Added tables
 
-Revision ID: bd84a0dc5a4e
+Revision ID: 2df0ada84da3
 Revises: 
-Create Date: 2024-09-01 23:04:47.489250
+Create Date: 2024-09-29 21:33:54.073081
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'bd84a0dc5a4e'
+revision: str = '2df0ada84da3'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -115,6 +115,7 @@ def upgrade() -> None:
     sa.Column('finish_at', sa.DateTime(), nullable=True, comment='Время завершения поездки'),
     sa.Column('unpaid_rest', sa.Numeric(precision=18, scale=2), nullable=True, comment='Неоплаченный остаток'),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True, comment='Дата создания исторической записи заказа'),
+    sa.Column('modified_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True, comment='Дата изменения исторической записи заказа'),
     sa.ForeignKeyConstraint(['car_id'], ['cars.car_id'], name='order_status_car_id_fkey'),
     sa.ForeignKeyConstraint(['order_id'], ['orders.order_id'], name='order_status_order_id_fkey'),
     sa.PrimaryKeyConstraint('id', name='order_status_pkey'),

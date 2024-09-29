@@ -1,4 +1,6 @@
 from celery import Celery, signals
+from celery.schedules import crontab
+
 from app.config import CELERY_BROKER_URL,DEBUG_MODE
 from app.rabbitmq_client import rabbitmq_client, APP_QUEUE_MAP
 from app.redis_client import redis_client_coordinates, redis_client_price
@@ -9,21 +11,26 @@ celery_app = Celery(
     "tasks",
     broker=CELERY_BROKER_URL,
     include=[
-        "app.endpoints.orders", 
-        # "app.tasks.analyze_job",
+        "app.tasks.analyze_job",
     ],
 )
 
 # Define queues (no need to specify exchange or routing key)
 celery_app.conf.task_queues = {
     "default": {},  # Default queue for general tasks
-    # "cron_tasks": {},  # Queue specifically for cron tasks
+    "cron_tasks": {},  # Queue specifically for cron tasks
 }
 
 # Configure task routes
 celery_app.conf.task_routes = {
-    "app.endpoints.orders.save_payinfo": {"queue": "default"},
-    # "app.tasks.analyze_job.analyze_incident_status_task": {"queue": "cron_tasks"},
+    "app.tasks.analyze_job.analyze_order_status_task": {"queue": "cron_tasks"},
+}
+
+celery_app.conf.beat_schedule = {
+    "analyze-incident-status-every-day": {
+        "task": "app.tasks.analyze_job.analyze_order_status_task",
+        "schedule": crontab(),  # Runs every minute
+    },
 }
 
 
