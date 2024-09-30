@@ -1,6 +1,6 @@
 services:
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:3.7
     container_name: localstack
     environment:
       - SERVICES=s3
@@ -104,7 +104,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16    
+    image: postgres:17-alpine    
     container_name: taxi_db
     ports:
       - "5432:5432"
@@ -127,7 +127,7 @@ services:
       start_period: 10s
 
   redis:
-      image: redis:7.2-alpine
+      image: redis:7.4-alpine
       container_name: redis_srv
       ports:
         - "6379:6379"
@@ -142,7 +142,7 @@ services:
         start_period: 10s
 
   rabbitmq:
-    image: rabbitmq:3.13.6-management
+    image: rabbitmq:4.0-management-alpine
     container_name: rabbitmq
     ports:
       - "5672:5672"

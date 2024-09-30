@@ -30,7 +30,7 @@ def analyze_order_status(db):
     finally:
         aws_service_client.close_clients()
 
-from sqlalchemy import func
+
 def get_average_times(db) -> list[dict]:
     # Dictionary to store total time and count for each transition
     transition_data = {}
