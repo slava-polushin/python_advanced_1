@@ -1,0 +1,8 @@
+# Команды для выгрузки накопленных данных из S3 в локальную директорию
+pip install awscli
+aws configure
+aws --endpoint-url=http://localhost:4566 s3 sync s3://bucket ./s3_data
+
+# Альтернативный сокращенный синтаксис
+pip install awscli-local
+awslocal s3 sync s3://bucket ./s3_data

@@ -3,7 +3,7 @@
 # без последствий для работоспособности приложения
 services:
   flower:
-    image: mher/flower
+    image: mher/flower:latest
     container_name: flower
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0

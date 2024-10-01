@@ -24,6 +24,13 @@ PRICE_REDIS_URL = os.getenv("PRICE_REDIS_URL", "redis://localhost:6379/2")
 RABBITMQ_URL = os.getenv(
     "RABBITMQ_URL", "RABBITMQ_URL=amqp://user:password@localhost:5672/"
 )
+
+AWS_REGION = os.getenv("AWS_REGION", "eu-west-1")
+LOCALSTACK_URL = os.getenv("LOCALSTACK_URL", "http://localhost:4566")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "dummy")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "dummy")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "bucket")
+
 RABBITMQ_RECONNECT_PAUSE = 5
 RABBITMQ_RECONNECT_COUNT = 100
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")

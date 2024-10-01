@@ -218,6 +218,8 @@ class OrderStatus(Base):
     unpaid_rest = mapped_column(Numeric(18, 2), comment='Неоплаченный остаток')
     created_at = mapped_column(DateTime(True), server_default=text(
         'now()'), comment='Дата создания исторической записи заказа')
+    modified_at = mapped_column(DateTime(True), server_default=text(
+        'now()'), server_onupdate=text('now()'), comment='Дата изменения исторической записи заказа')
 
     car: Mapped[Optional['Cars']] = relationship(
         'Cars', back_populates='order_status')
