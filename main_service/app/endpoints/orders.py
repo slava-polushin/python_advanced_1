@@ -124,9 +124,16 @@ def assign_car_to_order(
     new_orderstatus.comment = comment
     new_orderstatus.start_at = datetime.now()
 
+    # Поиск последнего состояния автомобиля
+    car_status = get_carstatus_in_db(db=db, car_id=car_id)
+    # Проверка корректности состояния автомобиля для назначения на заказ
+    if car_status.status in (carStatuses["broken"], carStatuses["driver_missing"]):
+        raise HTTPException(
+            status_code=404, detail=f"Car is in status {car_status.status} and can't be assigned to order")    
+
     db_orderstatus = add_new_orderstatus_in_db(db, new_orderstatus=new_orderstatus) 
 
-    db_car_status = assign_car_to_order_in_db(db=db, order_id=order_id, car_id=car_id)
+    assign_car_to_order_in_db(db=db, order_id=order_id, car_id=car_id)
 
     return OrderStatus(**db_orderstatus.model_dump())
 
@@ -198,7 +205,7 @@ def complete_order(
     new_orderstatus.finish_at = datetime.now()
 
     db_orderstatus = add_new_orderstatus_in_db(db, new_orderstatus=new_orderstatus) 
-
+    
     return OrderStatus(**db_orderstatus.model_dump())
 
 
