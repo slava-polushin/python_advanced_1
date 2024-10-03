@@ -363,9 +363,6 @@ def assign_car_to_order_in_db(db:Session, order_id: int, car_id: int) -> CarStat
             car_id=car_id, 
             order_id=order_id
         )
-    elif car_status.status in (carStatuses["broken"], carStatuses["driver_missing"]):
-        raise HTTPException(
-            status_code=404, detail=f"Car is in status {car_status.status} and can't be assigned to order")
     else:
         car_status.status = carStatuses["busy"]
         car_status.order_id = order_id
